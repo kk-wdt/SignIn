@@ -42,4 +42,12 @@ public class User {
     public void setAge(Integer age) {
         this.age = age;
     }
+
+    public String getTemp() {
+        return temp;
+    }
+
+    public void setTemp(String temp) {
+        this.temp = temp;
+    }
 }
