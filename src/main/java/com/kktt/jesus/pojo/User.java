@@ -9,8 +9,6 @@ public class User {
 
     private Integer age;
 
-    private String temp;
-
     public Integer getId() {
         return id;
     }
@@ -41,13 +39,5 @@ public class User {
 
     public void setAge(Integer age) {
         this.age = age;
-    }
-
-    public String getTemp() {
-        return temp;
-    }
-
-    public void setTemp(String temp) {
-        this.temp = temp;
     }
 }
