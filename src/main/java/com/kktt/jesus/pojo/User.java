@@ -9,6 +9,8 @@ public class User {
 
     private Integer age;
 
+    private String temp;
+
     public Integer getId() {
         return id;
     }
