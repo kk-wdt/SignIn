@@ -1,8 +1,11 @@
 package com.kktt.jesus.service.impl;
 
-import com.kktt.jesus.dao.UserDao;
-import com.kktt.jesus.pojo.User;
+import com.kktt.jesus.dao.UserDOMapper;
+import com.kktt.jesus.dataobject.UserDO;
 import com.kktt.jesus.service.UserService;
+import com.kktt.jesus.service.model.UserModel;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -10,24 +13,23 @@ import javax.annotation.Resource;
 @Service("userService")
 public class UserServiceImpl implements UserService {
 
-    @Resource
-    private UserDao userDao;
+    @Autowired
+    private UserDOMapper userDOMapper;
 
-
-    public User getUserById(int userId) {
-        return userDao.selectByPrimaryKey(userId);
+    public UserModel getUserById(int userId) {
+        UserDO userDO = userDOMapper.selectByPrimaryKey(userId);
+        return convertFromDataObject(userDO);
     }
 
-    public boolean addUser(User record){
-        boolean result = false;
-        try {
-            userDao.insertSelective(record);
-            result = true;
-        } catch (Exception e) {
-            e.printStackTrace();
+
+    private UserModel convertFromDataObject(UserDO userDO){
+        if (userDO == null) {
+            return null;
         }
-
-        return result;
+        UserModel userModel = new UserModel();
+        BeanUtils.copyProperties(userDO,userModel);
+        return userModel;
     }
+
 
 }
