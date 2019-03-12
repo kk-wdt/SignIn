@@ -5,6 +5,7 @@ import com.kktt.jesus.errror.EmBusinessError;
 import com.kktt.jesus.response.CommonReturnType;
 import com.kktt.jesus.service.UserService;
 import com.kktt.jesus.service.model.UserModel;
+import com.sun.tools.javac.util.Assert;
 import org.hibernate.annotations.Parameter;
 import org.omg.CORBA.PUBLIC_MEMBER;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller("user")
+@Controller
 @RequestMapping("/user")
 public class UserController extends BaseController{
     @Autowired
@@ -30,6 +31,9 @@ public class UserController extends BaseController{
     @RequestMapping("/showUser")
     @ResponseBody
     public CommonReturnType toIndex(Integer id) throws BusinessException {
+        if(id == null){
+            throw new BusinessException(EmBusinessError.USER_NOT_EXIST);
+        }
         UserModel user = userService.getUserById(id);
         if (user == null) {
             throw new BusinessException(EmBusinessError.USER_NOT_EXIST);
