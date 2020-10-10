@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/wx_login")
-public class WXLoginController extends BaseController {
+public class LoginController extends BaseController {
 
 
     @RequestMapping("/login")
