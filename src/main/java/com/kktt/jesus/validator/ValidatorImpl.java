@@ -1,12 +1,13 @@
 package com.kktt.jesus.validator;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.Set;
-
+@Component
 public class ValidatorImpl implements InitializingBean {
 
     private Validator validator;
