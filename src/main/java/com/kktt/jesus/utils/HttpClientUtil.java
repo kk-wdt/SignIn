@@ -1,4 +1,4 @@
-package com.kktt.jesus.Utils;
+package com.kktt.jesus.utils;
 
 
 import java.io.IOException;
