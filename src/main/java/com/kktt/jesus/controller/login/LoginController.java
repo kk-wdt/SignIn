@@ -1,7 +1,7 @@
 package com.kktt.jesus.controller.login;
 
 import com.google.gson.Gson;
-import com.kktt.jesus.Utils.HttpClientUtil;
+import com.kktt.jesus.utils.HttpClientUtil;
 import com.kktt.jesus.common.Constant;
 import com.kktt.jesus.controller.BaseController;
 import com.kktt.jesus.controller.viewobject.WXSession;
