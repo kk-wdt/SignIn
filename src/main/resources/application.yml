@@ -19,9 +19,9 @@ spring:
 
   datasource:
     test1:
-      url: jdbc:mysql://localhost:3306/enjoy?serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
+      url: jdbc:mysql://rm-bp1onc731630r3qy9jo.mysql.rds.aliyuncs.com:3306/goten?serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
       username: root
-      password: 123456
+      password: kktt0023@
       driver-class-name: com.mysql.cj.jdbc.Driver
       # 使用druid数据源
       type: com.alibaba.druid.pool.DruidDataSource
