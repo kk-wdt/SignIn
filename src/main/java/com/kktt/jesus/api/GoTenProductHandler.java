@@ -20,10 +20,8 @@ public class GoTenProductHandler {
 
     public void getProduct(){
         JSONObject response = goTenApi.getProduct();
-        JSONArray productList =response.getJSONObject("Message").getJSONArray("ProductInfoList");
+        JSONArray productList = response.getJSONObject("Message").getJSONArray("ProductInfoList");
         JSONObject productInfo = productList.getJSONObject(0);
-        productInfo.getString("");
-        System.out.println(1);
 
         AliexpressSkuPublishEntity entity = new AliexpressSkuPublishEntity();
         Long sku = productInfo.getLong("Sku");

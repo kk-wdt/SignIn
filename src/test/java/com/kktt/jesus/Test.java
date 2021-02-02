@@ -1,7 +1,5 @@
 package com.kktt.jesus;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.kktt.jesus.api.GoTenProductHandler;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
