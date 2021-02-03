@@ -1,17 +1,11 @@
 package com.kktt.jesus.dao.source1;
 
-import com.kktt.jesus.dataobject.GotenProductEntity;
+import com.kktt.jesus.dataobject.GotenProduct;
+import org.apache.ibatis.annotations.Param;
+import tk.mybatis.mapper.common.Mapper;
 
-public interface GotenProductDao {
-    int deleteByPrimaryKey(String id);
+public interface GotenProductDao  extends Mapper<GotenProduct> {
 
-    int insert(GotenProductEntity record);
+    int insertIgnore(@Param("entity") GotenProduct record);
 
-    int insertSelective(GotenProductEntity record);
-
-    GotenProductEntity selectByPrimaryKey(String id);
-
-    int updateByPrimaryKeySelective(GotenProductEntity record);
-
-    int updateByPrimaryKey(GotenProductEntity record);
 }

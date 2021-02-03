@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kktt.jesus.dao.source1.GotenProductDao">
+  <resultMap id="BaseResultMap" type="com.kktt.jesus.dataobject.GotenProduct">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="sku" jdbcType="BIGINT" property="sku" />
+    <result column="site" jdbcType="CHAR" property="site" />
+    <result column="state" jdbcType="TINYINT" property="state" />
+    <result column="sku_image_url" jdbcType="VARCHAR" property="skuImageUrl" />
+    <result column="preview_image_url" jdbcType="VARCHAR" property="previewImageUrl" />
+    <result column="image_urls" jdbcType="OTHER" property="imageUrls" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="price" jdbcType="DOUBLE" property="price" />
+    <result column="inventory" jdbcType="INTEGER" property="inventory" />
+    <result column="category_first_name" jdbcType="VARCHAR" property="categoryFirstName" />
+    <result column="category_second_name" jdbcType="VARCHAR" property="categorySecondName" />
+    <result column="category_third_name" jdbcType="VARCHAR" property="categoryThirdName" />
+    <result column="category_third_code" jdbcType="VARCHAR" property="categoryThirdCode" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="bullet_point" jdbcType="OTHER" property="bulletPoint" />
+    <result column="keywords" jdbcType="VARCHAR" property="keywords" />
+    <result column="property" jdbcType="VARCHAR" property="property" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, sku, site, `state`, sku_image_url, preview_image_url, image_urls, title, price, 
+    inventory, category_first_name, category_second_name, category_third_name, category_third_code, 
+    description, bullet_point, keywords, property, create_time, update_time
+  </sql>
+  <insert id="insertIgnore" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+    insert ignore into goten_product (sku, site, `state`,
+      sku_image_url, preview_image_url, image_urls, 
+      title, price, inventory, 
+      category_first_name, category_second_name, 
+      category_third_name, category_third_code, description, 
+      bullet_point, keywords, property, 
+      create_time, update_time)
+    values (#{sku,jdbcType=BIGINT}, #{site,jdbcType=CHAR}, #{state,jdbcType=TINYINT}, 
+      #{skuImageUrl,jdbcType=VARCHAR}, #{previewImageUrl,jdbcType=VARCHAR}, #{imageUrls,jdbcType=OTHER}, 
+      #{title,jdbcType=VARCHAR}, #{price,jdbcType=DOUBLE}, #{inventory,jdbcType=INTEGER}, 
+      #{categoryFirstName,jdbcType=VARCHAR}, #{categorySecondName,jdbcType=VARCHAR}, 
+      #{categoryThirdName,jdbcType=VARCHAR}, #{categoryThirdCode,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
+      #{bulletPoint,jdbcType=OTHER}, #{keywords,jdbcType=VARCHAR}, #{property,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+</mapper>

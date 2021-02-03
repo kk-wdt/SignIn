@@ -9,15 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class GoTenApi extends BaseApi {
 
-    public JSONObject getProduct() {
+    public JSONObject getProduct(Long sku) {
         Map<String, String> map = createCommonParam();
-        JSONObject message = createProductRequestMessage();
+        JSONObject message =  createProductRequestMessage(sku);
         map.put("Message", message.toJSONString());
         map = sortMapByKey(map);
         String sign = encrypt(JSON.toJSONString(map, SerializerFeature.WriteMapNullValue));
@@ -28,16 +27,34 @@ public class GoTenApi extends BaseApi {
         return response.getBody();
     }
 
-    private JSONObject createProductRequestMessage(){
+    public JSONObject getProduct(int index,String startDate,String endDate) {
+        Map<String, String> map = createCommonParam();
+        JSONObject message = createProductRequestMessage(index,startDate,endDate);
+        map.put("Message", message.toJSONString());
+        map = sortMapByKey(map);
+        String sign = encrypt(JSON.toJSONString(map, SerializerFeature.WriteMapNullValue));
+        String replaceBlankSign = replaceBlank(sign);
+        map.put("Sign", replaceBlankSign);
+
+        ResponseEntity<JSONObject> response = RestTemplateUtils.postJson(ApiConstant.PRODUCT_URL, JSON.toJSONString(map, SerializerFeature.WriteMapNullValue), JSONObject.class);
+        return response.getBody();
+    }
+
+    private JSONObject createProductRequestMessage(int index,String startDate,String endDate){
         JSONObject message = new JSONObject();
-        message.put("Skus", new JSONArray(Collections.singletonList("85169910")));
-//        message.put("startTime","2021-01-01");
-//        message.put("EndTime","2021-01-02");
-        message.put("PageIndex", "1");
+        message.put("startTime",startDate);
+        message.put("EndTime",endDate);
+        message.put("PageIndex", index);
         message.put("Site", "www.gotenchina.com");
         return message;
     }
 
+    private JSONObject createProductRequestMessage(long sku){
+        JSONObject message = new JSONObject();
+        message.put("Skus", new JSONArray(Collections.singletonList(sku)));
+        message.put("Site", "www.gotenchina.com");
+        return message;
+    }
 }
 
 

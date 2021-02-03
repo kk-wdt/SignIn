@@ -1,7 +1,9 @@
 package com.kktt.jesus.dataobject;
 
 import lombok.Data;
+import tk.mybatis.mapper.annotation.KeySql;
 
+import javax.persistence.Column;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,7 +12,9 @@ import java.util.Date;
  * @author 
  */
 @Data
-public class GotenProductEntity implements Serializable {
+public class GotenProduct implements Serializable {
+    @javax.persistence.Id
+    @KeySql(useGeneratedKeys = true)
     private String id;
 
     private Long sku;
@@ -24,14 +28,12 @@ public class GotenProductEntity implements Serializable {
 
     private String skuImageUrl;
 
-    private String previewImageUrl;
-
     private String imageUrls;
 
     private String title;
-
+    @Column(name = "price",insertable = false)
     private Double price;
-
+    @Column(name = "inventory",insertable = false)
     private Integer inventory;
 
     private String categoryFirstName;
