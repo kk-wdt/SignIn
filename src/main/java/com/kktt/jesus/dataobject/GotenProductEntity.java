@@ -26,7 +26,7 @@ public class GotenProductEntity implements Serializable {
 
     private String previewImageUrl;
 
-    private Object imageUrls;
+    private String imageUrls;
 
     private String title;
 
@@ -44,7 +44,7 @@ public class GotenProductEntity implements Serializable {
 
     private String description;
 
-    private Object bulletPoint;
+    private String bulletPoint;
 
     private String keywords;
 

@@ -30,7 +30,7 @@ public class GoTenApi extends BaseApi {
 
     private JSONObject createProductRequestMessage(){
         JSONObject message = new JSONObject();
-        message.put("Skus", new JSONArray(Collections.singletonList("83343773")));
+        message.put("Skus", new JSONArray(Collections.singletonList("85169910")));
 //        message.put("startTime","2021-01-01");
 //        message.put("EndTime","2021-01-02");
         message.put("PageIndex", "1");
