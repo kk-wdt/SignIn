@@ -4,6 +4,7 @@ import com.kktt.jesus.api.ProductConverter;
 import com.kktt.jesus.dao.source1.GotenProductDao;
 import com.kktt.jesus.dataobject.CommonEntity;
 import com.kktt.jesus.dataobject.GotenProduct;
+import com.kktt.jesus.utils.CommonUtil;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
@@ -13,7 +14,12 @@ import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -36,17 +42,48 @@ public class Test extends BaseTest{
     }
 
     @org.junit.Test
-    public void getSingleProduct(){
-        productConverter.getProduct(44075501L);
+    public void updatePrice(){
+        List<GotenProduct> all = gotenProductDao.selectAll();
+        if(CollectionUtils.isEmpty(all)){
+            return;
+        }
+        List<Long> skuList = all.stream().map(GotenProduct::getSku).collect(Collectors.toList());
+        List<List<Long>> skuGroup = CommonUtil.subCollection(skuList, 50);
+        for (List<Long> group : skuGroup) {
+            Map<Long, BigDecimal> priceMap = productConverter.getProductPrice(group);
+            updateProductPrice(priceMap);
+        }
     }
 
-    private void saveProduct(List<GotenProduct> xx ){
-        for (GotenProduct product : xx) {
-            GotenProduct exist = find(product.getSku());
-            if(exist == null){
-                gotenProductDao.insertSelective(product);
-            }
+    @org.junit.Test
+    public void updateQuantity(){
+        List<GotenProduct> all = gotenProductDao.selectAll();
+        if(CollectionUtils.isEmpty(all)){
+            return;
         }
+        List<Long> skuList = all.stream().map(GotenProduct::getSku).collect(Collectors.toList());
+        List<List<Long>> skuGroup = CommonUtil.subCollection(skuList, 50);
+        for (List<Long> group : skuGroup) {
+            Map<Long, Integer> priceMap = productConverter.getProductInventory(group);
+            updateProductInventory(priceMap);
+        }
+    }
+
+    private void updateProductInventory(Map<Long,Integer> inventoryMap) {
+        inventoryMap.forEach((k,v)->{
+            gotenProductDao.updateQuantity(k,v);
+        });
+    }
+
+    private void updateProductPrice(Map<Long,BigDecimal> priceMap) {
+        priceMap.forEach((k,v)->{
+            gotenProductDao.updatePrice(k,v);
+        });
+    }
+
+    @org.junit.Test
+    public void getSingleProduct(){
+        productConverter.getProduct(71549874L);
     }
 
     @org.junit.Test
@@ -63,4 +100,14 @@ public class Test extends BaseTest{
         GotenProduct xx = gotenProductDao.selectOneByExample(example);
         return xx;
     }
+
+    private void saveProduct(List<GotenProduct> xx ){
+        for (GotenProduct product : xx) {
+            GotenProduct exist = find(product.getSku());
+            if(exist == null){
+                gotenProductDao.insertSelective(product);
+            }
+        }
+    }
+
 }

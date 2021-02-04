@@ -4,19 +4,59 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kktt.jesus.dataobject.GotenProduct;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ProductConverter {
 
     @Resource
     private GoTenApi goTenApi;
+
+    public Map<Long, BigDecimal> getProductPrice(List<Long> skuList){
+        JSONObject response = goTenApi.getProductPrice(skuList);
+        return parseProductPrice(response);
+    }
+
+    public Map<Long, Integer> getProductInventory(List<Long> skuList){
+        JSONObject response = goTenApi.getProductInventory(skuList);
+        return parseProductInventory(response);
+    }
+
+    private Map<Long,Integer> parseProductInventory(JSONObject response) {
+        JSONArray messages = response.getJSONArray("Message");
+        Map<Long,Integer> quantityMap = new HashMap<>();
+        for (int i = 0; i < messages.size(); i++) {
+            JSONObject message = messages.getJSONObject(i);
+            Long sku = message.getLong("Sku");
+            Integer quantity = message.getJSONArray("ProductInventorySiteList").getJSONObject(0).getJSONArray("ProductInventoryList").getJSONObject(0).getInteger("Qty");
+            quantityMap.put(sku,quantity);
+        }
+        return quantityMap;
+    }
+
+    private Map<Long,BigDecimal> parseProductPrice(JSONObject response) {
+        JSONArray messages = response.getJSONArray("Message");
+        Map<Long,BigDecimal> priceMap = new HashMap<>();
+        for (int i = 0; i < messages.size(); i++) {
+            JSONObject message = messages.getJSONObject(i);
+            Long sku = message.getLong("Sku");
+            JSONObject priceJson = message.getJSONArray("WarehousePriceList").getJSONObject(0);
+            BigDecimal price = priceJson.getBigDecimal("SellingPrice");
+            priceMap.put(sku,price);
+        }
+        return priceMap;
+    }
 
     public GotenProduct getProduct(Long sku){
         JSONObject response = goTenApi.getProduct(sku);
@@ -101,7 +141,24 @@ public class ProductConverter {
 //                };
                     if(propertyName.equalsIgnoreCase("特征")){
                         String desc = property.getString("GoodsDescription");
-                        String[] bullets = desc.split("<br/>");
+                        String[] bullets = new String[0];
+                        if(desc.contains("Note:")){
+                            Elements pList = Jsoup.parse(desc).select("p");
+                            for (Element element : pList) {
+                                if(element.text().contains("Features")){
+                                    bullets = element.text().split("[ ]\\d+[.]");
+                                }
+                            }
+                            if(bullets.length == 0){
+                                bullets = Jsoup.parse(desc).text().split("[ ]\\d+[.]");
+                            }
+                        }else{
+                            bullets = Jsoup.parse(desc).text().split("[ ]\\d+[.]");
+                        }
+                        if(bullets.length == 0){
+                            bullets = desc.split("<br/>");
+                        }
+
                         List<String> bulletList = new ArrayList<>();
                         for (int b = 0; b < bullets.length; b++) {
                             if(b == 0){
@@ -112,8 +169,7 @@ public class ProductConverter {
                             if(StringUtils.isEmpty(bulletContent.trim()) || bulletContent.length() < 3){
                                 continue;
                             }
-                            bulletContent = bulletContent.substring(3);
-                            bulletList.add(bulletContent);
+                            bulletList.add(bulletContent.trim());
                         }
                         gotenProduct.setBulletPoint(JSON.toJSONString(bulletList));
 
