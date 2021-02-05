@@ -32,7 +32,7 @@ public class Test extends BaseTest{
     @org.junit.Test
     public void test(){
         int index = 1;
-        List<GotenProduct> xx = productConverter.getProduct(index,"2021-01-01","2021-02-03");
+        List<GotenProduct> xx = productConverter.getProduct(index,"2021-12-01","2021-01-01");
         while (!CollectionUtils.isEmpty(xx)){
             System.out.println("数据长度:"+xx.size());
             saveProduct(xx);

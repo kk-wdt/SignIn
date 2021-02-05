@@ -1,8 +1,10 @@
 package com.kktt.jesus.dao;
 
 import com.kktt.jesus.dao.source1.CommonMapper;
+import com.kktt.jesus.dao.source1.GotenProductDao;
 import com.kktt.jesus.dao.source2.Common2Mapper;
 import com.kktt.jesus.dataobject.CommonEntity;
+import com.kktt.jesus.dataobject.GotenProduct;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,4 +56,11 @@ public class CommonMapperTest {
         System.out.println(1);
     }
 
+    @Resource
+    private GotenProductDao gotenProductDao;
+    @Test
+    public void test(){
+        List<GotenProduct> xx = gotenProductDao.selectAll();
+        System.out.println(1);
+    }
 }

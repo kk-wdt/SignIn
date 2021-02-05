@@ -28,6 +28,11 @@
     inventory, category_first_name, category_second_name, category_third_name, category_third_code, 
     description, bullet_point, keywords, property, create_time, update_time
   </sql>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select * from goten_product
+  </select>
+
   <insert id="insertIgnore" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
     insert ignore into goten_product (sku, site, `state`,
       sku_image_url, preview_image_url, image_urls, 
