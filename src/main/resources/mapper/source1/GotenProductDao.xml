@@ -7,7 +7,6 @@
     <result column="site" jdbcType="CHAR" property="site" />
     <result column="state" jdbcType="TINYINT" property="state" />
     <result column="sku_image_url" jdbcType="VARCHAR" property="skuImageUrl" />
-    <result column="preview_image_url" jdbcType="VARCHAR" property="previewImageUrl" />
     <result column="image_urls" jdbcType="OTHER" property="imageUrls" />
     <result column="title" jdbcType="VARCHAR" property="title" />
     <result column="price" jdbcType="DOUBLE" property="price" />
@@ -24,7 +23,7 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, sku, site, `state`, sku_image_url, preview_image_url, image_urls, title, price, 
+    id, sku, site, `state`, sku_image_url, image_urls, title, price, 
     inventory, category_first_name, category_second_name, category_third_name, category_third_code, 
     description, bullet_point, keywords, property, create_time, update_time
   </sql>
@@ -35,18 +34,55 @@
 
   <insert id="insertIgnore" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
     insert ignore into goten_product (sku, site, `state`,
-      sku_image_url, preview_image_url, image_urls, 
+      sku_image_url, image_urls,
       title, price, inventory, 
       category_first_name, category_second_name, 
       category_third_name, category_third_code, description, 
       bullet_point, keywords, property, 
       create_time, update_time)
-    values (#{sku,jdbcType=BIGINT}, #{site,jdbcType=CHAR}, #{state,jdbcType=TINYINT}, 
-      #{skuImageUrl,jdbcType=VARCHAR}, #{previewImageUrl,jdbcType=VARCHAR}, #{imageUrls,jdbcType=OTHER}, 
-      #{title,jdbcType=VARCHAR}, #{price,jdbcType=DOUBLE}, #{inventory,jdbcType=INTEGER}, 
-      #{categoryFirstName,jdbcType=VARCHAR}, #{categorySecondName,jdbcType=VARCHAR}, 
-      #{categoryThirdName,jdbcType=VARCHAR}, #{categoryThirdCode,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
-      #{bulletPoint,jdbcType=OTHER}, #{keywords,jdbcType=VARCHAR}, #{property,jdbcType=VARCHAR}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+    values   (#{item.sku,jdbcType=BIGINT}, #{item.site,jdbcType=CHAR}, #{item.state,jdbcType=TINYINT},
+      #{item.skuImageUrl,jdbcType=VARCHAR},  #{item.imageUrls,jdbcType=OTHER},
+      #{item.title,jdbcType=VARCHAR}, #{item.price,jdbcType=DOUBLE}, #{item.inventory,jdbcType=INTEGER},
+      #{item.categoryFirstName,jdbcType=VARCHAR}, #{item.categorySecondName,jdbcType=VARCHAR},
+      #{item.categoryThirdName,jdbcType=VARCHAR}, #{item.categoryThirdCode,jdbcType=VARCHAR}, #{item.description,jdbcType=VARCHAR},
+      #{item.bulletPoint,jdbcType=OTHER}, #{item.keywords,jdbcType=VARCHAR}, #{item.property,jdbcType=VARCHAR},
+      #{item.createTime,jdbcType=TIMESTAMP}, #{item.updateTime,jdbcType=TIMESTAMP})
   </insert>
+
+  <insert id="batchInsert" parameterType="java.util.List">
+    insert ignore into goten_product (sku, site, `state`,
+    sku_image_url, image_urls,
+    title, price, inventory,
+    category_first_name, category_second_name,
+    category_third_name, category_third_code, description,
+    bullet_point, keywords, property,
+    create_time, update_time)
+    VALUES
+    <foreach collection="list" item="item" separator=",">
+      (#{item.sku,jdbcType=BIGINT}, #{item.site,jdbcType=CHAR}, #{item.state,jdbcType=TINYINT},
+      #{item.skuImageUrl,jdbcType=VARCHAR}, #{item.imageUrls,jdbcType=OTHER},
+      #{item.title,jdbcType=VARCHAR}, #{item.price,jdbcType=DOUBLE}, #{item.inventory,jdbcType=INTEGER},
+      #{item.categoryFirstName,jdbcType=VARCHAR}, #{item.categorySecondName,jdbcType=VARCHAR},
+      #{item.categoryThirdName,jdbcType=VARCHAR}, #{item.categoryThirdCode,jdbcType=VARCHAR}, #{item.description,jdbcType=VARCHAR},
+      #{item.bulletPoint,jdbcType=OTHER}, #{item.keywords,jdbcType=VARCHAR}, #{item.property,jdbcType=VARCHAR},
+      #{item.createTime,jdbcType=TIMESTAMP}, #{item.updateTime,jdbcType=TIMESTAMP})
+    </foreach>
+  </insert>
+
+  <update id="batchUpdatePrice" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" separator=";">
+      UPDATE goten_product
+      SET price = #{item.price}
+      WHERE sku = #{item.sku}
+    </foreach>
+  </update>
+
+  <update id="batchUpdateInventory" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" separator=";">
+      UPDATE goten_product
+      SET inventory = #{item.inventory}
+      WHERE sku = #{item.sku}
+    </foreach>
+  </update>
+
 </mapper>

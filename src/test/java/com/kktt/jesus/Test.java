@@ -15,10 +15,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SpringBootTest
@@ -32,12 +29,12 @@ public class Test extends BaseTest{
     @org.junit.Test
     public void test(){
         int index = 1;
-        List<GotenProduct> xx = productConverter.getProduct(index,"2021-12-01","2021-01-01");
+        List<GotenProduct> xx = productConverter.getProduct(index,"2020-12-01","2021-01-01");
         while (!CollectionUtils.isEmpty(xx)){
             System.out.println("数据长度:"+xx.size());
             saveProduct(xx);
             index ++;
-            xx = productConverter.getProduct(index,"2021-01-01","2021-02-03");
+            xx = productConverter.getProduct(index,"2020-12-01","2021-01-01");
         }
     }
 
@@ -70,15 +67,25 @@ public class Test extends BaseTest{
     }
 
     private void updateProductInventory(Map<Long,Integer> inventoryMap) {
+        List<Map<String,Object>> datas = new ArrayList<>();
         inventoryMap.forEach((k,v)->{
-            gotenProductDao.updateQuantity(k,v);
+            Map<String,Object> item = new HashMap<>();
+            item.put("sku",k);
+            item.put("inventory",v);
+            datas.add(item);
         });
+        gotenProductDao.batchUpdateInventory(datas);
     }
 
     private void updateProductPrice(Map<Long,BigDecimal> priceMap) {
+        List<Map<String,Object>> datas = new ArrayList<>();
         priceMap.forEach((k,v)->{
-            gotenProductDao.updatePrice(k,v);
+            Map<String,Object> item = new HashMap<>();
+            item.put("sku",k);
+            item.put("price",v);
+            datas.add(item);
         });
+        gotenProductDao.batchUpdatePrice(datas);
     }
 
     @org.junit.Test
@@ -103,10 +110,11 @@ public class Test extends BaseTest{
 
     private void saveProduct(List<GotenProduct> xx ){
         for (GotenProduct product : xx) {
-            GotenProduct exist = find(product.getSku());
-            if(exist == null){
-                gotenProductDao.insertSelective(product);
-            }
+//            GotenProduct exist = find(product.getSku());
+//            if(exist == null){
+//                gotenProductDao.insertSelective(product);
+//            }
+            gotenProductDao.insertIgnore(product);
         }
     }
 
