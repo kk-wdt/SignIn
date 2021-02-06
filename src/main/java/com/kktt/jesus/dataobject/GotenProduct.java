@@ -35,7 +35,7 @@ public class GotenProduct implements Serializable {
     private Double price;
     @Column(name = "inventory",insertable = false)
     private Integer inventory;
-
+    @Column(name = "category_first_name")
     private String categoryFirstName;
 
     private String categorySecondName;

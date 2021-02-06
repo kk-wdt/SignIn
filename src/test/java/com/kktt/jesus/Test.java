@@ -1,16 +1,24 @@
 package com.kktt.jesus;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.kktt.jesus.api.ProductConverter;
 import com.kktt.jesus.dao.source1.GotenProductDao;
+import com.kktt.jesus.dao.source1.PublishMapper;
+import com.kktt.jesus.dataobject.AliexpressSkuPublishEntity;
 import com.kktt.jesus.dataobject.CommonEntity;
 import com.kktt.jesus.dataobject.GotenProduct;
 import com.kktt.jesus.utils.CommonUtil;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.runner.RunWith;
+import org.omg.PortableServer.POA;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
@@ -66,6 +74,95 @@ public class Test extends BaseTest{
         }
     }
 
+    @Resource
+    private PublishMapper publishMapper;
+    @org.junit.Test
+    public void convert2Publish() throws JSONException {
+        List<GotenProduct> xx = gotenProductDao.selectValidProduct("Yard & Garden & Outdoor");
+        List<GotenProduct> result = new ArrayList<>();
+        List<GotenProduct> result3 = new ArrayList<>();
+
+        for (GotenProduct gotenProduct : xx) {
+            if(StringUtils.isEmpty(gotenProduct.getBulletPoint())){
+                continue;
+            }
+            AliexpressSkuPublishEntity publishEntity = convert(gotenProduct);
+            publishMapper.insertSelective(publishEntity);
+        }
+        System.out.println(1);
+    }
+
+    private AliexpressSkuPublishEntity convert( GotenProduct xx) throws JSONException {
+        AliexpressSkuPublishEntity target = new AliexpressSkuPublishEntity();
+        target.setSkuId(xx.getSku());
+        target.setAmazonMarketplaceId(1);
+        target.setImageUrls(xx.getImageUrls());
+        target.setSkuImageUrl(xx.getSkuImageUrl());
+        target.setUpdateDelete(0);
+        target.setSite("us");
+        target.setState(4);
+        double newPrice = (xx.getPrice().floatValue()) / (1 - 0.15 - 0.2);
+        BigDecimal tmp = new BigDecimal(newPrice+"");
+        target.setPrice( tmp.setScale(2, BigDecimal.ROUND_HALF_UP));
+        target.setInventory(xx.getInventory());
+        target.setProperties("{}");
+        target.setTitle(xx.getTitle());
+
+        JSONObject property = new JSONObject();
+        property.put("brand_name","Nother");
+        property.put("manufacturer","Nother");
+        property.put("item_type","patio-conversation-sets");
+        property.put("description",xx.getDescription());
+        property.put("bullet_points",xx.getBulletPoint());
+        property.put("generic_keywords",xx.getKeywords().replaceAll("\"","").replace("[","").replace("]"," "));
+        property.put("fulfillment_latency","3");
+        property.put("feed_product_type","outdoorliving");
+
+
+//        String popt = xx.getProperty();
+//        if(!StringUtils.isEmpty(popt)){
+//            com.alibaba.fastjson.JSONObject popJson = JSON.parseObject(popt);
+//            property.put("package_height",popJson.getString("SpecHeight"));
+//            property.put("package_height_unit_of_measure","CM");
+//            property.put("package_width",popJson.getString("SpecWidth"));
+//            property.put("package_width_unit_of_measure","CM");
+//            property.put("package_length",popJson.getString("SpecLength"));
+//            property.put("package_length_unit_of_measure","CM");
+//            property.put("package_weight",popJson.getString("SpecWeight"));
+//            property.put("package_weight_unit_of_measure","GR");
+//        }
+
+        target.setNodeValue(property.toString());
+        target.setNodeId("16135380011");
+        target.setItemType("patio-conversation-sets");
+        target.setId("us-"+xx.getSku());
+
+        target.setListingId("");
+        target.setProductId(xx.getSku());
+        return target;
+    }
+
+
+    @org.junit.Test
+    public void getSingleProduct(){
+        GotenProduct x = find(61650971L);
+        GotenProduct xx = productConverter.getProduct(71549874L);
+    }
+
+
+    private GotenProduct find(Long sku){
+        Example example = new Example(GotenProduct.class);
+        example.createCriteria().andEqualTo("sku", sku);
+        GotenProduct xx = gotenProductDao.selectOneByExample(example);
+        return xx;
+    }
+
+    private void saveProduct(List<GotenProduct> xx ){
+        for (GotenProduct product : xx) {
+            gotenProductDao.insertIgnore(product);
+        }
+    }
+
     private void updateProductInventory(Map<Long,Integer> inventoryMap) {
         List<Map<String,Object>> datas = new ArrayList<>();
         inventoryMap.forEach((k,v)->{
@@ -86,36 +183,6 @@ public class Test extends BaseTest{
             datas.add(item);
         });
         gotenProductDao.batchUpdatePrice(datas);
-    }
-
-    @org.junit.Test
-    public void getSingleProduct(){
-        productConverter.getProduct(71549874L);
-    }
-
-    @org.junit.Test
-    public void test1(){
-        Example example = new Example(GotenProduct.class);
-        example.createCriteria().andEqualTo("sku", "85169910");
-        GotenProduct xx = gotenProductDao.selectOneByExample(example);
-        System.out.println(1);
-    }
-
-    private GotenProduct find(Long sku){
-        Example example = new Example(GotenProduct.class);
-        example.createCriteria().andEqualTo("sku", sku);
-        GotenProduct xx = gotenProductDao.selectOneByExample(example);
-        return xx;
-    }
-
-    private void saveProduct(List<GotenProduct> xx ){
-        for (GotenProduct product : xx) {
-//            GotenProduct exist = find(product.getSku());
-//            if(exist == null){
-//                gotenProductDao.insertSelective(product);
-//            }
-            gotenProductDao.insertIgnore(product);
-        }
     }
 
 }

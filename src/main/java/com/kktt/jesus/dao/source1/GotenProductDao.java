@@ -2,6 +2,7 @@ package com.kktt.jesus.dao.source1;
 
 import com.kktt.jesus.dataobject.GotenProduct;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -29,4 +30,6 @@ public interface GotenProductDao  extends Mapper<GotenProduct> {
 
 //    @Select("select * from goten_product")
     List<GotenProduct> selectAll();
+
+    List<GotenProduct> selectValidProduct(@Param("category") String category);
 }

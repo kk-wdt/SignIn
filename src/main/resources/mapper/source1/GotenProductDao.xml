@@ -23,14 +23,20 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, sku, site, `state`, sku_image_url, image_urls, title, price, 
-    inventory, category_first_name, category_second_name, category_third_name, category_third_code, 
+    id, sku, site, `state`, sku_image_url, image_urls, title, price,
+    inventory, category_first_name, category_second_name, category_third_name, category_third_code,
     description, bullet_point, keywords, property, create_time, update_time
   </sql>
 
   <select id="selectAll" resultMap="BaseResultMap">
     select * from goten_product
   </select>
+
+  <select id="selectValidProduct" resultMap="BaseResultMap">
+    select * from goten_product where category_second_name = #{category} and
+     <![CDATA[ price < 100 and inventory > 10 ]]>
+  </select>
+
 
   <insert id="insertIgnore" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
     insert ignore into goten_product (sku, site, `state`,

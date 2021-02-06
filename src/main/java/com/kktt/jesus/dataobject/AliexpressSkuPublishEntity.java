@@ -2,9 +2,11 @@ package com.kktt.jesus.dataobject;
 
 import lombok.Data;
 
+import javax.persistence.Table;
 import java.math.BigDecimal;
 
 @Data
+@Table(name = "aliexpress_sku_publish")
 public class AliexpressSkuPublishEntity {
     public interface STATE{
         Integer IGNORE = -1;//不符合要求商品
@@ -26,6 +28,8 @@ public class AliexpressSkuPublishEntity {
     private Long skuId;
 
     private Long productId;
+
+    private Integer updateDelete;
 
     private String site;
 
@@ -58,5 +62,7 @@ public class AliexpressSkuPublishEntity {
     private String errorCode;
 
     private String error;
+
+    private String listingId;
 
 }
