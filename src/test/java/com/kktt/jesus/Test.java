@@ -61,6 +61,12 @@ public class Test extends BaseTest{
     }
 
     @org.junit.Test
+    public void tess(){
+        Map<Long, Integer> xx = productConverter.getProductInventory(Collections.singletonList(9988203L));
+        System.out.println(1);
+    }
+
+    @org.junit.Test
     public void updateQuantity(){
         List<GotenProduct> all = gotenProductDao.selectAll();
         if(CollectionUtils.isEmpty(all)){
