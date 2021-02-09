@@ -17,6 +17,13 @@ mybatis:
 spring:
   profiles: dev
 
+  redis:
+    host: redis.dev.tapcash.com
+    pool:
+      max-active:10
+      min-idle:1
+    database: 15
+
   datasource:
     test1:
       url: jdbc:mysql://rm-bp1onc731630r3qy9jo.mysql.rds.aliyuncs.com:3306/goten?serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
