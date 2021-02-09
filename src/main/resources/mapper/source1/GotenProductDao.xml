@@ -78,7 +78,7 @@
   <update id="batchUpdatePrice" parameterType="java.util.List">
     <foreach collection="list" item="item" index="index" separator=";">
       UPDATE goten_product
-      SET price = #{item.price}
+      SET price = #{item.price},state = 1
       WHERE sku = #{item.sku}
     </foreach>
   </update>
@@ -86,7 +86,7 @@
   <update id="batchUpdateInventory" parameterType="java.util.List">
     <foreach collection="list" item="item" index="index" separator=";">
       UPDATE goten_product
-      SET inventory = #{item.inventory}
+      SET inventory = #{item.inventory},state = 2
       WHERE sku = #{item.sku}
     </foreach>
   </update>

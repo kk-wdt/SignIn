@@ -8,6 +8,7 @@ import com.kktt.jesus.dao.source1.PublishMapper;
 import com.kktt.jesus.dataobject.AliexpressSkuPublishEntity;
 import com.kktt.jesus.dataobject.CommonEntity;
 import com.kktt.jesus.dataobject.GotenProduct;
+import com.kktt.jesus.service.RedisQueueService;
 import com.kktt.jesus.utils.CommonUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,6 +24,8 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,12 +40,15 @@ public class Test extends BaseTest{
     @org.junit.Test
     public void test(){
         int index = 1;
-        List<GotenProduct> xx = productConverter.getProduct(index,"2020-12-01","2021-01-01");
+        Instant now = Instant.now();
+        Instant startInstant = now.minus(1, ChronoUnit.DAYS);
+        String endDate = now.toString();
+        String startDate = startInstant.toString();
+        List<GotenProduct> xx = productConverter.getProduct(index,startDate,endDate);
         while (!CollectionUtils.isEmpty(xx)){
-            System.out.println("数据长度:"+xx.size());
             saveProduct(xx);
             index ++;
-            xx = productConverter.getProduct(index,"2020-12-01","2021-01-01");
+            xx = productConverter.getProduct(index,startDate,endDate);
         }
     }
 
@@ -85,8 +91,6 @@ public class Test extends BaseTest{
     @org.junit.Test
     public void convert2Publish() throws JSONException {
         List<GotenProduct> xx = gotenProductDao.selectValidProduct("Yard & Garden & Outdoor");
-        List<GotenProduct> result = new ArrayList<>();
-        List<GotenProduct> result3 = new ArrayList<>();
 
         for (GotenProduct gotenProduct : xx) {
             if(StringUtils.isEmpty(gotenProduct.getBulletPoint())){
@@ -106,7 +110,7 @@ public class Test extends BaseTest{
         target.setSkuImageUrl(xx.getSkuImageUrl());
         target.setUpdateDelete(0);
         target.setSite("us");
-        target.setState(4);
+        target.setState(0);
         double newPrice = (xx.getPrice().floatValue()) / (1 - 0.15 - 0.2);
         BigDecimal tmp = new BigDecimal(newPrice+"");
         target.setPrice( tmp.setScale(2, BigDecimal.ROUND_HALF_UP));
@@ -154,7 +158,6 @@ public class Test extends BaseTest{
         GotenProduct x = find(61650971L);
         GotenProduct xx = productConverter.getProduct(71549874L);
     }
-
 
     private GotenProduct find(Long sku){
         Example example = new Example(GotenProduct.class);

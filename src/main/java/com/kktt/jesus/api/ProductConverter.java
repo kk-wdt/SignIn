@@ -86,7 +86,7 @@ public class ProductConverter {
             System.out.println(sku);
             gotenProduct.setSite("US");
             gotenProduct.setSku(sku);
-            gotenProduct.setState((byte) 4);
+            gotenProduct.setState((byte) 0);
 
             //长宽高重量
             JSONObject prop = new JSONObject();

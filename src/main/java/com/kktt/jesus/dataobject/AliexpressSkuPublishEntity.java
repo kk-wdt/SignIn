@@ -17,6 +17,7 @@ public class AliexpressSkuPublishEntity {
         Integer FINISH_IMAGE = 4;//图片处理完成
         Integer REQUEST = 5;//请求创建任务中
     }
+    @javax.persistence.Id
     private String id;
 
     private Integer amazonMarketplaceId;
@@ -40,8 +41,6 @@ public class AliexpressSkuPublishEntity {
     private Integer state;
 
     private String skuImageUrl;
-
-    private String previewImageUrl;
 
     private String imageUrls;
 

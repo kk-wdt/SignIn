@@ -3,7 +3,9 @@ package com.kktt.jesus.dao;
 import com.kktt.jesus.dao.source1.AmazonMarketplaceDao;
 import com.kktt.jesus.dao.source1.CommonMapper;
 import com.kktt.jesus.dao.source1.GotenProductDao;
+import com.kktt.jesus.dao.source1.PublishMapper;
 import com.kktt.jesus.dao.source2.Common2Mapper;
+import com.kktt.jesus.dataobject.AliexpressSkuPublishEntity;
 import com.kktt.jesus.dataobject.AmazonMarketplace;
 import com.kktt.jesus.dataobject.CommonEntity;
 import com.kktt.jesus.dataobject.GotenProduct;
@@ -16,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -67,10 +71,12 @@ public class CommonMapperTest {
     }
 
     @Resource
-    private AmazonMarketplaceDao amazonMarketplaceDao;
+    private PublishMapper publishMapper;
     @Test
     public void tesss(){
-        AmazonMarketplace xx = amazonMarketplaceDao.findById(1);
-        System.out.println(1);
+        AliexpressSkuPublishEntity xx = publishMapper.selectByPrimaryKey("us-12877698");
+        xx.setInventory(146);
+        xx.setPrice(new BigDecimal("98.45"));
+        publishMapper.batchUpdate(Collections.singletonList(xx));
     }
 }

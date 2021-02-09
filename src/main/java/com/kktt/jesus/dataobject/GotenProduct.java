@@ -13,6 +13,12 @@ import java.util.Date;
  */
 @Data
 public class GotenProduct implements Serializable {
+    public interface STATE{
+        Integer NEW = 0;
+        Integer UPDATING = 1;
+        Integer COMPLETE = 2;
+    }
+
     @javax.persistence.Id
     @KeySql(useGeneratedKeys = true)
     private String id;

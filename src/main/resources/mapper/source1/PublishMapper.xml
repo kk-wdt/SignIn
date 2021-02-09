@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kktt.jesus.dao.source1.PublishMapper">
+
+
+  <update id="batchUpdate" parameterType="java.util.List">
+    update aliexpress_sku_publish
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="price =case" suffix="end,">
+        <foreach collection="list" item="item" index="index">
+          <if test="item.price!=null">
+            when id=#{item.id} then #{item.price}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="inventory =case" suffix="end,">
+        <foreach collection="list" item="item" index="index">
+          <if test="item.price!=null">
+            when id=#{item.id} then #{item.inventory}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+      #{item.id}
+    </foreach>
+
+  </update>
+
+</mapper>

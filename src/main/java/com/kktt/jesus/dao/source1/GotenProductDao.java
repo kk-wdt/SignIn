@@ -32,4 +32,10 @@ public interface GotenProductDao  extends Mapper<GotenProduct> {
     List<GotenProduct> selectAll();
 
     List<GotenProduct> selectValidProduct(@Param("category") String category);
+
+    @Select("select * from goten_product where state = 0")
+    List<GotenProduct> queryNewProduct();
+
+    @Select("select * from goten_product where state = #{state}")
+    List<GotenProduct> queryByState(@Param("state")int state);
 }
