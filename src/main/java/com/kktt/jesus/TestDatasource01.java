@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import tk.mybatis.spring.annotation.MapperScan;
 
@@ -63,6 +65,16 @@ public class TestDatasource01 {
     public SqlSessionTemplate testSqlSessionTemplate(
             @Qualifier("test1SqlSessionFactory") SqlSessionFactory sqlSessionFactory) throws Exception {
         return new SqlSessionTemplate(sqlSessionFactory);
+    }
+
+    @Bean(name = "jdbcDropShippingTemplate")
+    public JdbcTemplate jdbcDropShippingTemplate(@Qualifier("test1DataSource") DataSource dropshippingDataSource) {
+        return new JdbcTemplate(dropshippingDataSource);
+    }
+
+    @Bean(name = "namedParameterJdbcDropShippingTemplate")
+    public NamedParameterJdbcTemplate namedParameterJdbcDropShippingTemplate(@Qualifier("test1DataSource") DataSource dropshippingDataSource) {
+        return new NamedParameterJdbcTemplate(dropshippingDataSource);
     }
 
 }

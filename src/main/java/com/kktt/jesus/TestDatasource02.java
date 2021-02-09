@@ -10,6 +10,8 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import tk.mybatis.spring.annotation.MapperScan;
 
@@ -54,6 +56,16 @@ public class TestDatasource02 {
     public SqlSessionTemplate testSqlSessionTemplate(
             @Qualifier("test2SqlSessionFactory") SqlSessionFactory sqlSessionFactory) throws Exception {
         return new SqlSessionTemplate(sqlSessionFactory);
+    }
+
+    @Bean(name = "jdbcTemplate")
+    public JdbcTemplate jdbcTemplate(@Qualifier("test2DataSource") DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+
+    @Bean(name = "namedParameterJdbcTemplate")
+    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(@Qualifier("test2DataSource") DataSource dataSource) {
+        return new NamedParameterJdbcTemplate(dataSource);
     }
 
 }
