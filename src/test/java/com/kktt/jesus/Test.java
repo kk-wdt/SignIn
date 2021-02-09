@@ -39,17 +39,17 @@ public class Test extends BaseTest{
     private ProductConverter productConverter;
     @org.junit.Test
     public void test(){
-        int index = 1;
-        Instant now = Instant.now();
-        Instant startInstant = now.minus(1, ChronoUnit.DAYS);
-        String endDate = now.toString();
-        String startDate = startInstant.toString();
-        List<GotenProduct> xx = productConverter.getProduct(index,startDate,endDate);
-        while (!CollectionUtils.isEmpty(xx)){
-            saveProduct(xx);
-            index ++;
-            xx = productConverter.getProduct(index,startDate,endDate);
-        }
+//        int index = 1;
+//        Instant now = Instant.now();
+//        Instant startInstant = now.minus(1, ChronoUnit.DAYS);
+//        String endDate = now.toString();
+//        String startDate = startInstant.toString();
+//        List<GotenProduct> xx = productConverter.getProduct(index,startDate,endDate);
+//        while (!CollectionUtils.isEmpty(xx)){
+//            saveProduct(xx);
+//            index ++;
+//            xx = productConverter.getProduct(index,startDate,endDate);
+//        }
     }
 
     @org.junit.Test
