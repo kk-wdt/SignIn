@@ -1,9 +1,9 @@
 package com.kktt.jesus.schedule.mapping;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.kktt.jesus.dataobject.AliexpressSkuPublishEntity;
 import com.kktt.jesus.dataobject.GotenProduct;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.math.BigDecimal;
 

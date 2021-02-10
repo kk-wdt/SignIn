@@ -1,5 +1,7 @@
 package com.kktt.jesus.schedule;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.kktt.jesus.TaskConsumerComponent;
 import com.kktt.jesus.api.ProductConverter;
 import com.kktt.jesus.dao.source1.GotenProductDao;
@@ -8,8 +10,6 @@ import com.kktt.jesus.dataobject.AliexpressSkuPublishEntity;
 import com.kktt.jesus.dataobject.GotenProduct;
 import com.kktt.jesus.service.RedisQueueService;
 import com.kktt.jesus.utils.CommonUtil;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
