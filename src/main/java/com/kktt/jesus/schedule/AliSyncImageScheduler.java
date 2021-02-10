@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Component
 public class AliSyncImageScheduler {
     protected static final Logger logger = LoggerFactory.getLogger(AliSyncImageScheduler.class);
-    public static final String DP_QUEUE_ALI_IMAGE_CHANGE_TASK = "DP_Queue_Ali_Image_Change_Task";
+    public static final String GT_QUEUE_ALI_IMAGE_CHANGE_TASK = "GT_Queue_Ali_Image_Change_Task";
     private static final String UPLOAD_PREFIX_URL = "https://gotenimh.oss-cn-hangzhou.aliyuncs.com/";
 
     @Resource
@@ -62,7 +62,7 @@ public class AliSyncImageScheduler {
             aliexpressSkuPublishDao.updateUndoStateByProductId(legalProducts,AliexpressSkuPublishEntity.STATE.DOING);
             //扔到redis 一个个做图片下载和转化
             List<String> productIds = legalProducts.stream().map(Object::toString).collect(Collectors.toList());
-            redisQueueService.push(DP_QUEUE_ALI_IMAGE_CHANGE_TASK,productIds);
+            redisQueueService.push(GT_QUEUE_ALI_IMAGE_CHANGE_TASK,productIds);
         }
         if(CollectionUtils.isNotEmpty(illegalProducts)){
             aliexpressSkuPublishDao.updateUndoStateByProductId(illegalProducts,AliexpressSkuPublishEntity.STATE.IGNORE);
@@ -86,7 +86,7 @@ public class AliSyncImageScheduler {
     }
 
     private void fetchImage(){
-        taskConsumerComponent.consume(DP_QUEUE_ALI_IMAGE_CHANGE_TASK, productId -> {
+        taskConsumerComponent.consume(GT_QUEUE_ALI_IMAGE_CHANGE_TASK, productId -> {
             if(StringUtils.isEmpty(productId)){
                 return;
             }

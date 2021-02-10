@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
+//@Component
 public class GoTenProductPublishScheduler {
     protected static final Logger logger = LoggerFactory.getLogger(GoTenProductPublishScheduler.class);
 

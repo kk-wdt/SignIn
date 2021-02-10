@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import org.junit.runner.RunWith;
 import org.omg.PortableServer.POA;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.RedisServer;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -157,6 +158,14 @@ public class Test extends BaseTest{
     public void getSingleProduct(){
         GotenProduct x = find(61650971L);
         GotenProduct xx = productConverter.getProduct(71549874L);
+    }
+
+    @Resource
+    private RedisQueueService redisQueueService;
+    @org.junit.Test
+    public void redisTest(){
+//        redisQueueService.push("testList","11");
+        redisQueueService.leftPopAndAddIntoZSet("testList","zset");
     }
 
     private GotenProduct find(Long sku){

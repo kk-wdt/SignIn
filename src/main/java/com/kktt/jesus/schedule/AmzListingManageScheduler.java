@@ -25,23 +25,23 @@ public class AmzListingManageScheduler extends AmzListingManageBaseScheduler {
     @Value("${spring.profiles.active:dev}")
     protected String env;
 
-    public static final String DP_QUEUE_FEEDS_REQUEST_TASK = "DP_Queue_Feeds_Request_Task";//创建feed请求
-    public static final String DP_QUEUE_FEEDS_REPORT_TASK = "DP_Queue_Feeds_Report_Task";//处理feed报告
+    public static final String GT_QUEUE_FEEDS_REQUEST_TASK = "GT_Queue_Feeds_Request_Task";//创建feed请求
+    public static final String GT_QUEUE_FEEDS_REPORT_TASK = "GT_Queue_Feeds_Report_Task";//处理feed报告
 
 
     @Scheduled(fixedDelay = 30 * 1000, initialDelay = 15 * 1000)
     public void runCreateFeedRequest() {
-        runCreateFeedRequest(DP_QUEUE_FEEDS_REQUEST_TASK);
+        runCreateFeedRequest(GT_QUEUE_FEEDS_REQUEST_TASK);
     }
 
     @Scheduled(fixedDelay = 45 * 1000, initialDelay = 20 * 1000)
     public void runGetDoneSubmissionId() {
-       doGetDoneSubmissionId(DP_QUEUE_FEEDS_REPORT_TASK, (byte) 0);
+       doGetDoneSubmissionId(GT_QUEUE_FEEDS_REPORT_TASK, (byte) 0);
     }
 
     @Scheduled(fixedDelay = 60 * 1000, initialDelay = 15 * 1000)
     public void runGetDoneFeedReport(){
-        runGetDoneFeedReport(DP_QUEUE_FEEDS_REPORT_TASK);
+        runGetDoneFeedReport(GT_QUEUE_FEEDS_REPORT_TASK);
     }
 
     @Override

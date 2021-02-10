@@ -46,7 +46,7 @@ public abstract class AmzFeedsBasicScheduler {
     @Value("${spring.profiles.active:dev}")
     protected String env;
 
-    private static final String QUEUE_SMART_FEED_LIMIT_PREFIX = "DP_Queue_Feed_Limit_";
+    private static final String QUEUE_SMART_FEED_LIMIT_PREFIX = "GT_Queue_Feed_Limit_";
 
     protected abstract void createFeedRequest(String value, AmazonMarketplace amazonMarketplace) throws MWSRequestException, MarketplaceWebServiceException;
 

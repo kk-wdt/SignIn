@@ -45,7 +45,7 @@ public class AmzFlatFileListingBatchCreateScheduler extends AmzListingCreateBase
     @Resource
     private AmazonCategoryTemplateParamDao amazonCategoryTemplateParamDao;
 
-    public static final String DP_QUEUE_FLAT_FILE_LISTING_CREATE_REPORT_TASK = "DP_Queue_Flat_File_Listing_Create_Report_Task";
+    public static final String GT_QUEUE_FLAT_FILE_LISTING_CREATE_REPORT_TASK = "GT_Queue_Flat_File_Listing_Create_Report_Task";
 
     @Scheduled(fixedDelay = 300 * 1000, initialDelay = 15 * 1000)
     public void runCreateFeedRequest() {
@@ -82,12 +82,12 @@ public class AmzFlatFileListingBatchCreateScheduler extends AmzListingCreateBase
 
     @Scheduled(fixedDelay = 45 * 1000, initialDelay = 20 * 1000)
     public void runGetDoneSubmissionId() {
-        doGetDoneSubmissionId(DP_QUEUE_FLAT_FILE_LISTING_CREATE_REPORT_TASK, ListingCreateRecordsEntity.TYPE.FLAT_FILE_LISTING_CREATE);
+        doGetDoneSubmissionId(GT_QUEUE_FLAT_FILE_LISTING_CREATE_REPORT_TASK, ListingCreateRecordsEntity.TYPE.FLAT_FILE_LISTING_CREATE);
     }
 
     @Scheduled(fixedDelay = 60 * 1000, initialDelay = 15 * 1000)
     public void runGetDoneFeedReport() {
-        runGetDoneFeedReport(DP_QUEUE_FLAT_FILE_LISTING_CREATE_REPORT_TASK);
+        runGetDoneFeedReport(GT_QUEUE_FLAT_FILE_LISTING_CREATE_REPORT_TASK);
     }
 
     @Override

@@ -14,7 +14,7 @@ import java.util.List;
 @Component
 public class TaskConsumerComponent {
 
-    public static final String PENDING_TASK_PREFIX = "DP_Pending_";
+    public static final String PENDING_TASK_PREFIX = "GT_Pending_";
 
     private static final Logger logger = LoggerFactory.getLogger(TaskConsumerComponent.class);
 

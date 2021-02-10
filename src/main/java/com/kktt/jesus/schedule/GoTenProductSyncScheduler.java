@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
+//@Component
 public class GoTenProductSyncScheduler {
     protected static final Logger logger = LoggerFactory.getLogger(GoTenProductSyncScheduler.class);
 
@@ -41,7 +41,8 @@ public class GoTenProductSyncScheduler {
     @Resource
     private TaskConsumerComponent taskConsumerComponent;
 
-    @Scheduled(cron = "0 10 22 * * ?", zone = "GMT+8")
+//    @Scheduled(cron = "0 10 22 * * ?", zone = "GMT+8")
+    @Scheduled(fixedDelay = 3000 * 1000, initialDelay = 10 * 1000)
     public void runSyncProduct() {
         int index = 1;
         Instant now = Instant.now();
@@ -50,6 +51,7 @@ public class GoTenProductSyncScheduler {
         String startDate = startInstant.toString();
         List<GotenProduct> xx = productConverter.getProduct(index,startDate,endDate);
         while (!CollectionUtils.isEmpty(xx)){
+            logger.info("同步商品数量：{}",xx.size());
             saveProduct(xx);
             index ++;
             xx = productConverter.getProduct(index,startDate,endDate);

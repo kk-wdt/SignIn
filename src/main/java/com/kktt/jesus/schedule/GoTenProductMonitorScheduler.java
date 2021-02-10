@@ -23,9 +23,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.kktt.jesus.schedule.AmzListingManageScheduler.DP_QUEUE_FEEDS_REQUEST_TASK;
+import static com.kktt.jesus.schedule.AmzListingManageScheduler.GT_QUEUE_FEEDS_REQUEST_TASK;
 
-@Component
+//@Component
 public class GoTenProductMonitorScheduler {
     protected static final Logger logger = LoggerFactory.getLogger(GoTenProductMonitorScheduler.class);
 
@@ -115,7 +115,7 @@ public class GoTenProductMonitorScheduler {
         aliExpressListTask.setTasks(items);
         aliExpressListTask.setType(type);
         aliExpressListTask.setUuid(uuid);
-        redisQueueService.push(DP_QUEUE_FEEDS_REQUEST_TASK, JSON.toJSONString(aliExpressListTask));
+        redisQueueService.push(GT_QUEUE_FEEDS_REQUEST_TASK, JSON.toJSONString(aliExpressListTask));
     }
 
 
