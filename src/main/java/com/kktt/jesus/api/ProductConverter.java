@@ -3,10 +3,14 @@ package com.kktt.jesus.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kktt.jesus.dao.source1.GotenProductDao;
 import com.kktt.jesus.dataobject.GotenProduct;
+import com.kktt.jesus.schedule.GoTenProductSyncScheduler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -16,16 +20,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class ProductConverter {
 
     @Resource
     private GoTenApi goTenApi;
+    @Resource
+    private GotenProductDao gotenProductDao;
 
     public Map<Long, BigDecimal> getProductPrice(List<Long> skuList){
         JSONObject response = goTenApi.getProductPrice(skuList);
-        return parseProductPrice(response);
+        return parseProductPrice(skuList,response);
     }
 
     public Map<Long, Integer> getProductInventory(List<Long> skuList){
@@ -44,9 +51,16 @@ public class ProductConverter {
         }
         return quantityMap;
     }
+    protected static final Logger logger = LoggerFactory.getLogger(ProductConverter.class);
 
-    private Map<Long,BigDecimal> parseProductPrice(JSONObject response) {
+    private Map<Long,BigDecimal> parseProductPrice(List<Long> skuList, JSONObject response) {
         JSONArray messages = response.getJSONArray("Message");
+        if(messages == null){
+            logger.error("错误的结果:{}",response.getJSONObject("Error").getString("LongMessage"));
+            String skuStr = skuList.stream().map(Object::toString).collect(Collectors.joining(","));
+            gotenProductDao.updateState(skuStr);
+            return new HashMap<>();
+        }
         Map<Long,BigDecimal> priceMap = new HashMap<>();
         for (int i = 0; i < messages.size(); i++) {
             JSONObject message = messages.getJSONObject(i);
@@ -104,6 +118,9 @@ public class ProductConverter {
             gotenProduct.setTitle(title);
 
             JSONArray imageList = productInfo.getJSONArray("GoodsImageList");
+            if(imageList.isEmpty()){
+                continue;
+            }
             List<String> extraImages = new ArrayList<>();
             for (int j = 0; j < imageList.size(); j++) {
                 try{
@@ -182,6 +199,9 @@ public class ProductConverter {
                     keywordList.add(keyword);
                 }
                 gotenProduct.setKeywords(JSONObject.toJSONString(keywordList));
+            }
+            if(StringUtils.isEmpty(gotenProduct.getBulletPoint()) || gotenProduct.getBulletPoint().equals("[]")){
+                continue;
             }
             gotenProduct.setCreateTime(productInfo.getSqlDate("CreateTime"));
             gotenProduct.setUpdateTime(productInfo.getSqlDate("UpdateTime"));

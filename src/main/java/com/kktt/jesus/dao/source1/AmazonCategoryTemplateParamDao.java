@@ -14,11 +14,11 @@ import java.util.List;
 @Repository
 public class AmazonCategoryTemplateParamDao {
     @Resource
-    @Qualifier("jdbcTemplate")
-    private JdbcTemplate jdbcTemplate;
+    @Qualifier("jdbcDropShippingTemplate")
+    private JdbcTemplate jdbcDropShippingTemplate;
 
     public AmazonsCategoryTemplateParamEntity findVariationTheme(String marketplaceId, String nodeId) {
-        List<AmazonsCategoryTemplateParamEntity> list = jdbcTemplate.query(String.format("select * from %s where node_id = ? and field_name = 'variation_theme'", getTableName(marketplaceId)), new BeanPropertyRowMapper<>(AmazonsCategoryTemplateParamEntity.class), nodeId);
+        List<AmazonsCategoryTemplateParamEntity> list = jdbcDropShippingTemplate.query(String.format("select * from %s where node_id = ? and field_name = 'variation_theme'", getTableName(marketplaceId)), new BeanPropertyRowMapper<>(AmazonsCategoryTemplateParamEntity.class), nodeId);
         return CollectionUtils.isEmpty(list)?null: list.get(0);
     }
 

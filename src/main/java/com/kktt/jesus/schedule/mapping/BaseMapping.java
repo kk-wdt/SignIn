@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 public abstract class BaseMapping {
 
-    protected AliexpressSkuPublishEntity convert(GotenProduct xx) throws JSONException {
+    public AliexpressSkuPublishEntity convert(GotenProduct xx) throws JSONException {
         AliexpressSkuPublishEntity target = new AliexpressSkuPublishEntity();
         target.setSkuId(xx.getSku());
         target.setAmazonMarketplaceId(1);
@@ -18,7 +18,7 @@ public abstract class BaseMapping {
         target.setUpdateDelete(0);
         target.setSite("us");
         target.setState(0);
-        double newPrice = (xx.getPrice().floatValue()) / (1 - 0.15 - 0.2);
+        double newPrice = (xx.getPrice().floatValue()) / (1 - 0.15 - 0.3);
         BigDecimal tmp = new BigDecimal(newPrice+"");
         target.setPrice( tmp.setScale(2, BigDecimal.ROUND_HALF_UP));
         target.setInventory(xx.getInventory());
@@ -32,16 +32,19 @@ public abstract class BaseMapping {
         property.put("bullet_points",xx.getBulletPoint());
         property.put("generic_keywords",xx.getKeywords().replaceAll("\"","").replace("[","").replace("]"," "));
         property.put("fulfillment_latency","3");
-        property.put("item_type","patio-conversation-sets");
-        property.put("feed_product_type","outdoorliving");
-
+        
+        setCategoryProperty(property);
+        
         target.setNodeValue(property.toString());
-        target.setNodeId("16135380011");
-        target.setItemType("patio-conversation-sets");
+        target.setNodeId(getNodeId());
         target.setId("us-"+xx.getSku());
 
         target.setListingId("");
         target.setProductId(xx.getSku());
         return target;
     }
+
+    protected abstract String getNodeId();
+
+    protected abstract void setCategoryProperty(JSONObject property);
 }

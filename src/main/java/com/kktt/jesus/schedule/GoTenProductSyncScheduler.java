@@ -38,15 +38,13 @@ public class GoTenProductSyncScheduler {
     private ProductConverter productConverter;
     @Resource
     private RedisQueueService redisQueueService;
-    @Resource
-    private TaskConsumerComponent taskConsumerComponent;
 
 //    @Scheduled(cron = "0 10 22 * * ?", zone = "GMT+8")
     @Scheduled(fixedDelay = 3000 * 1000, initialDelay = 10 * 1000)
     public void runSyncProduct() {
         int index = 1;
         Instant now = Instant.now();
-        Instant startInstant = now.minus(1, ChronoUnit.DAYS);
+        Instant startInstant = now.minus(30, ChronoUnit.DAYS);
         String endDate = now.toString();
         String startDate = startInstant.toString();
         List<GotenProduct> xx = productConverter.getProduct(index,startDate,endDate);
@@ -56,6 +54,7 @@ public class GoTenProductSyncScheduler {
             index ++;
             xx = productConverter.getProduct(index,startDate,endDate);
         }
+        logger.info("同步当天商品完成");
     }
 
     @Scheduled(fixedDelay = 30 * 1000, initialDelay = 30 * 1000)
@@ -65,7 +64,7 @@ public class GoTenProductSyncScheduler {
             return;
         }
         List<Long> skuList = newProductList.stream().map(GotenProduct::getSku).collect(Collectors.toList());
-        List<List<Long>> skuGroup = CommonUtil.subCollection(skuList, 50);
+        List<List<Long>> skuGroup = CommonUtil.subCollection(skuList, 1);
         for (List<Long> group : skuGroup) {
             Map<Long, BigDecimal> priceMap = productConverter.getProductPrice(group);
             updateProductPrice(priceMap);
@@ -80,7 +79,7 @@ public class GoTenProductSyncScheduler {
             return;
         }
         List<Long> skuList = taskList.stream().map(GotenProduct::getSku).collect(Collectors.toList());
-        List<List<Long>> skuGroup = CommonUtil.subCollection(skuList, 50);
+        List<List<Long>> skuGroup = CommonUtil.subCollection(skuList, 1);
         for (List<Long> group : skuGroup) {
             Map<Long, Integer> priceMap = productConverter.getProductInventory(group);
             updateProductInventory(priceMap);
@@ -104,6 +103,9 @@ public class GoTenProductSyncScheduler {
             item.put("price",v);
             datas.add(item);
         });
+        if(CollectionUtils.isEmpty(datas)){
+            return;
+        }
         gotenProductDao.batchUpdatePrice(datas);
     }
 
@@ -115,6 +117,9 @@ public class GoTenProductSyncScheduler {
             item.put("inventory",v);
             datas.add(item);
         });
+        if(CollectionUtils.isEmpty(datas)){
+            return;
+        }
         gotenProductDao.batchUpdateInventory(datas);
     }
 

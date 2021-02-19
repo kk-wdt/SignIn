@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class AmzFlatFileListingBatchCreateScheduler extends AmzListingCreateBaseScheduler {
-    public static final String SKU_PREFIX = "dps_";
+    public static final String SKU_PREFIX = "gt_";
     @Resource
     private ListingCreateRecordsDao listingCreateRecordsDao;
     @Value("${spring.profiles.active:dev}")
@@ -47,7 +47,7 @@ public class AmzFlatFileListingBatchCreateScheduler extends AmzListingCreateBase
 
     public static final String GT_QUEUE_FLAT_FILE_LISTING_CREATE_REPORT_TASK = "GT_Queue_Flat_File_Listing_Create_Report_Task";
 
-    @Scheduled(fixedDelay = 300 * 1000, initialDelay = 15 * 1000)
+    @Scheduled(fixedDelay = 300 * 1000, initialDelay = 5 * 1000)
     public void runCreateFeedRequest() {
         List<AliexpressSkuPublishEntity> taskList = aliexpressSkuPublishDao.query(AliexpressSkuPublishEntity.STATE.FINISH_IMAGE);
         if (CollectionUtils.isEmpty(taskList)) {

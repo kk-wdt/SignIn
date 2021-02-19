@@ -38,4 +38,7 @@ public interface GotenProductDao  extends Mapper<GotenProduct> {
 
     @Select("select * from goten_product where state = #{state}")
     List<GotenProduct> queryByState(@Param("state")int state);
+
+    @Update("update goten_product set state = -1 where sku in (#{skus})")
+    void updateState(@Param("skus") String skuStr);
 }

@@ -33,8 +33,8 @@
   </select>
 
   <select id="selectValidProduct" resultMap="BaseResultMap">
-    select * from goten_product where category_second_name = #{category} and
-     <![CDATA[ price < 100 and inventory > 10 ]]>
+    select * from goten_product where category_third_name = #{category} and
+     <![CDATA[ price < 200 and inventory > 10 ]]>
   </select>
 
 

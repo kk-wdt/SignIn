@@ -31,6 +31,7 @@ public class ImgTools {
     }
 
     public static void scaleImage(String netPath,String disFile)throws Exception{
+        SslUtils.ignoreSsl();
         BufferedImage bufImg = ImageIO.read(new URL(netPath));
         BufferedImage img = reSize(bufImg);
         img = reMark(img);

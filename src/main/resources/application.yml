@@ -22,14 +22,14 @@ spring:
       url: jdbc:mysql://rm-bp1onc731630r3qy9jo.mysql.rds.aliyuncs.com:3306/goten?serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
       username: root
       password: kktt0023@
-      driver-class-name: com.mysql.cj.jdbc.Driver
+      driver-class-name: com.mysql.jdbc.Driver
       # 使用druid数据源
       type: com.alibaba.druid.pool.DruidDataSource
     test2:
       url: jdbc:mysql://rm-bp1onc731630r3qy9jo.mysql.rds.aliyuncs.com：3306/goten?serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
       username: root
       password: kktt0023@
-      driver-class-name: com.mysql.cj.jdbc.Driver
+      driver-class-name: com.mysql.jdbc.Driver
       # 使用druid数据源
       type: com.alibaba.druid.pool.DruidDataSource
 
