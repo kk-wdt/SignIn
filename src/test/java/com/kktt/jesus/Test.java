@@ -156,8 +156,8 @@ public class Test extends BaseTest{
 
     @org.junit.Test
     public void getSingleProduct(){
-        GotenProduct x = find(61650971L);
-        GotenProduct xx = productConverter.getProduct(71549874L);
+        GotenProduct xx = productConverter.getProduct(25792916L);
+        System.out.println(1);
     }
 
     @Resource

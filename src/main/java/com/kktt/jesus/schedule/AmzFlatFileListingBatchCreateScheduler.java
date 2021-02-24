@@ -60,9 +60,11 @@ public class AmzFlatFileListingBatchCreateScheduler extends AmzListingCreateBase
     /**
      * 处理出错的提交记录
      */
-    @Scheduled(fixedDelay = 600 * 1000, initialDelay = 60 * 1000)
+    @Scheduled(fixedDelay = 120 * 1000, initialDelay = 10 * 1000)
     public void dealWithErrorRequest() {
         //8541 8008 重新提交
+        logger.info("listing搬运 -- 处理错误记录");
+
         List<AliexpressSkuPublishEntity> errorTaskList = aliexpressSkuPublishDao.queryRetryTask();
         if (CollectionUtils.isEmpty(errorTaskList)) {
             logger.info("listing搬运 -- 无错误记录");
@@ -184,12 +186,12 @@ public class AmzFlatFileListingBatchCreateScheduler extends AmzListingCreateBase
             AmazonMarketplace amazonMarketplace = amazonMarketplaceService.forceFindActive(Integer.parseInt(shopId));
             aliexpressSkuPublishDao.updatePrefix(shopId, skuIdList, amazonMarketplace.getPrefix());
             AmazonsCategoryTemplateEntity template = amazonCategoryTemplateDao.find(nodeId);
-            AmazonsCategoryTemplateParamEntity variationTheme = amazonCategoryTemplateParamDao.findVariationTheme(amazonMarketplace.getMarketplaceId(), nodeId);
-            if(variationTheme == null){
-                logger.info("不支持变体的类目,nodeId:{};shopId:{}",nodeId,shopId);
-                return;
-            }
-            List<ListingInfo> listingInfos = convertToListingInfo(shopNodeTaskList,variationTheme.getValues());
+//            AmazonsCategoryTemplateParamEntity variationTheme = amazonCategoryTemplateParamDao.findVariationTheme(amazonMarketplace.getMarketplaceId(), nodeId);
+//            if(variationTheme == null){
+//                logger.info("不支持变体的类目,nodeId:{};shopId:{}",nodeId,shopId);
+//                return;
+//            }
+            List<ListingInfo> listingInfos = convertToListingInfo(shopNodeTaskList,"");
             String tsv = FeedTsvUtil.batchCreateRequestContent(listingInfos, template);
 //            logger.info("创建的TSV:{}/n",tsv);
             String submissionId = mwsFeeds.submitFeed(amazonMarketplace, FeedsXmlUtil.conventToStream(tsv, xmlPath,amazonMarketplace.getMarketplaceId()), MwsFeeds.FLAT_FILE_LISTINGS_FEED);
@@ -235,9 +237,9 @@ public class AmzFlatFileListingBatchCreateScheduler extends AmzListingCreateBase
                 //设置变体信息
                 setVariation(listingInfo, values);
                 String properties = values.get(0).getProperties();
-                JSONObject propertyJson = JSON.parseObject(properties);
-                JSONArray variationThemeArr = JSON.parseArray(variationThemeStr);
-                listingInfo.setVariationTheme(VariationUtil.matchVariationTheme(propertyJson,variationThemeArr));
+//                JSONObject propertyJson = JSON.parseObject(properties);
+//                JSONArray variationThemeArr = JSON.parseArray(variationThemeStr);
+                listingInfo.setVariationTheme("Size");
             }
             listingInfos.add(listingInfo);
         });

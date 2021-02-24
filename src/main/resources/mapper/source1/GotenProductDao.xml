@@ -33,10 +33,18 @@
   </select>
 
   <select id="selectValidProduct" resultMap="BaseResultMap">
-    select * from goten_product where category_third_name = #{category} and
+    select * from goten_product where category_third_name = #{category} and state = 2 and
      <![CDATA[ price < 200 and inventory > 10 ]]>
   </select>
 
+  <update id="batchUpdateState">
+      update goten_product set state = #{state}
+      where id in(
+      <foreach collection="idList" item="item" separator=",">
+        '${item}'
+      </foreach>
+      )
+  </update>
 
   <insert id="insertIgnore" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
     insert ignore into goten_product (sku, site, `state`,

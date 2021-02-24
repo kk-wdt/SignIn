@@ -41,4 +41,6 @@ public interface GotenProductDao  extends Mapper<GotenProduct> {
 
     @Update("update goten_product set state = -1 where sku in (#{skus})")
     void updateState(@Param("skus") String skuStr);
+
+    void batchUpdateState(@Param("idList")List<String> idList,@Param("state") Integer state);
 }

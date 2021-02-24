@@ -29,7 +29,6 @@ public abstract class BaseMapping {
         property.put("brand_name","Nother");
         property.put("manufacturer","Nother");
         property.put("description",xx.getDescription());
-        property.put("bullet_points",xx.getBulletPoint());
         property.put("generic_keywords",xx.getKeywords().replaceAll("\"","").replace("[","").replace("]"," "));
         property.put("fulfillment_latency","3");
         

@@ -17,6 +17,7 @@ public class GotenProduct implements Serializable {
         Integer NEW = 0;
         Integer UPDATING = 1;
         Integer COMPLETE = 2;
+        Integer PUBLISHED = 3;
     }
 
     @javax.persistence.Id

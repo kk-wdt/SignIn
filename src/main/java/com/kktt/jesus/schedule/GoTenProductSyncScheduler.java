@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-//@Component
+@Component
 public class GoTenProductSyncScheduler {
     protected static final Logger logger = LoggerFactory.getLogger(GoTenProductSyncScheduler.class);
 
@@ -39,22 +39,24 @@ public class GoTenProductSyncScheduler {
     @Resource
     private RedisQueueService redisQueueService;
 
-//    @Scheduled(cron = "0 10 22 * * ?", zone = "GMT+8")
-    @Scheduled(fixedDelay = 3000 * 1000, initialDelay = 10 * 1000)
+    @Scheduled(cron = "0 10 22 * * ?", zone = "GMT+8")
+//    @Scheduled(fixedDelay = 30000 * 1000, initialDelay = 10 * 1000)
     public void runSyncProduct() {
-        int index = 1;
         Instant now = Instant.now();
-        Instant startInstant = now.minus(30, ChronoUnit.DAYS);
+        Instant startInstant = now.minus(60, ChronoUnit.DAYS);
         String endDate = now.toString();
         String startDate = startInstant.toString();
+        int index = 1;
+        int max = productConverter.getProductSize(1,startDate,endDate);
+        logger.info("同步商品开始 总页数：{}",max);
         List<GotenProduct> xx = productConverter.getProduct(index,startDate,endDate);
-        while (!CollectionUtils.isEmpty(xx)){
-            logger.info("同步商品数量：{}",xx.size());
+        while (index <= max){
+            logger.info("同步商品数量：{},index:{}",xx.size(),index);
             saveProduct(xx);
             index ++;
             xx = productConverter.getProduct(index,startDate,endDate);
         }
-        logger.info("同步当天商品完成");
+        logger.info("同步当天商品完成 index:{}",index);
     }
 
     @Scheduled(fixedDelay = 30 * 1000, initialDelay = 30 * 1000)
@@ -92,6 +94,9 @@ public class GoTenProductSyncScheduler {
         }
 
         List<String> skuList = xx.stream().map(GotenProduct::getSku).map(Object::toString).collect(Collectors.toList());
+        if(CollectionUtils.isEmpty(skuList)){
+            return;
+        }
         redisQueueService.push(GT_SYNC_PRODUCT_PRICE_QUEUE,skuList);
     }
 

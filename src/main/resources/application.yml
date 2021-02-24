@@ -7,8 +7,8 @@ spring:
 mybatis:
   typeAliasesPackage: com.kktt.jesus.pojo
   mapperLocations: classpath:mapper/*.xml
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 
 ---

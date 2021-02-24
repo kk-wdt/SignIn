@@ -78,6 +78,14 @@ public class ProductConverter {
         return result.isEmpty()?null:result.get(0);
     }
 
+    public int getProductSize(int index,String startDate,String endDate){
+        JSONObject response = goTenApi.getProduct(index,startDate,endDate);
+        if(response.getJSONObject("Message") == null){
+            return 0;
+        }
+        return response.getJSONObject("Message").getIntValue("PageTotal");
+    }
+
     public List<GotenProduct> getProduct(int index,String startDate,String endDate){
         JSONObject response = goTenApi.getProduct(index,startDate,endDate);
         if(response.getJSONObject("Message") == null){
@@ -143,55 +151,16 @@ public class ProductConverter {
             JSONArray xx = productInfo.getJSONArray("GoodsDescriptionList");
             for (int k = 0; k < xx.size(); k++) {
                 JSONArray propertyArr = xx.getJSONObject(k).getJSONArray("GoodsDescriptionParagraphList");
+                StringBuilder descHtml = new StringBuilder();
                 for (int h = 0; h < propertyArr.size(); h++) {
                     JSONObject property = propertyArr.getJSONObject(h);
-                    String propertyName = property.getString("ParagraphName");
-                    if(propertyName.equalsIgnoreCase("规格")){
-                        gotenProduct.setDescription(property.getString("GoodsDescription"));
-                    };
-//                if(propertyName.equalsIgnoreCase("包装内含")){
-//                    gotenProduct.setDescription(property.getString("GoodsDescription"));
-//                };
-//
-//                if(propertyName.equalsIgnoreCase("首段描述")){
-//                    gotenProduct.setDescription(property.getString("GoodsDescription"));
-//                };
-                    if(propertyName.equalsIgnoreCase("特征")){
-                        String desc = property.getString("GoodsDescription");
-                        String[] bullets = new String[0];
-                        if(desc.contains("Note:")){
-                            Elements pList = Jsoup.parse(desc).select("p");
-                            for (Element element : pList) {
-                                if(element.text().contains("Features")){
-                                    bullets = element.text().split("[ ]\\d+[.]");
-                                }
-                            }
-                            if(bullets.length == 0){
-                                bullets = Jsoup.parse(desc).text().split("[ ]\\d+[.]");
-                            }
-                        }else{
-                            bullets = Jsoup.parse(desc).text().split("[ ]\\d+[.]");
-                        }
-                        if(bullets.length == 0){
-                            bullets = desc.split("<br/>");
-                        }
-
-                        List<String> bulletList = new ArrayList<>();
-                        for (int b = 0; b < bullets.length; b++) {
-                            if(b == 0){
-                                continue;
-                            }
-
-                            String bulletContent = bullets[b].replace("</p>","").replace("</p>","");
-                            if(StringUtils.isEmpty(bulletContent.trim()) || bulletContent.length() < 3){
-                                continue;
-                            }
-                            bulletList.add(bulletContent.trim());
-                        }
-                        gotenProduct.setBulletPoint(JSON.toJSONString(bulletList));
-
-                    };
+                    String desc = property.getString("GoodsDescription");
+                    //最大长度2000
+                    if(descHtml.length() + desc.length() <= 1500){
+                        descHtml.append(desc);
+                    }
                 }
+                gotenProduct.setDescription(descHtml.toString());
                 JSONArray keywords = xx.getJSONObject(k).getJSONArray("GoodsDescriptionKeywordList");
                 List<String> keywordList = new ArrayList<>();
                 for (int kw = 0; kw < keywords.size(); kw++) {
@@ -199,9 +168,6 @@ public class ProductConverter {
                     keywordList.add(keyword);
                 }
                 gotenProduct.setKeywords(JSONObject.toJSONString(keywordList));
-            }
-            if(StringUtils.isEmpty(gotenProduct.getBulletPoint()) || gotenProduct.getBulletPoint().equals("[]")){
-                continue;
             }
             gotenProduct.setCreateTime(productInfo.getSqlDate("CreateTime"));
             gotenProduct.setUpdateTime(productInfo.getSqlDate("UpdateTime"));
