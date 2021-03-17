@@ -34,7 +34,12 @@
 
   <select id="selectValidProduct" resultMap="BaseResultMap">
     select * from goten_product where category_third_name = #{category} and state = 2 and
-     <![CDATA[ price < 200 and inventory > 10 ]]>
+     <![CDATA[ price < 200 and inventory > 5 ]]>
+  </select>
+
+  <select id="selectDeskChair" resultMap="BaseResultMap">
+   SELECT * FROM goten_product WHERE title LIKE "%${category}%" AND category_third_name = #{thirdCategory} and  state = 2  and
+     <![CDATA[ price < 200 and inventory > 5 ]]>
   </select>
 
   <update id="batchUpdateState">

@@ -2,18 +2,22 @@ package com.kktt.jesus;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.kktt.jesus.api.GoTenApi;
 import com.kktt.jesus.api.ProductConverter;
 import com.kktt.jesus.dao.source1.GotenProductDao;
 import com.kktt.jesus.dao.source1.PublishMapper;
 import com.kktt.jesus.dataobject.AliexpressSkuPublishEntity;
 import com.kktt.jesus.dataobject.CommonEntity;
 import com.kktt.jesus.dataobject.GotenProduct;
+import com.kktt.jesus.schedule.GoTenProductSyncScheduler;
 import com.kktt.jesus.service.RedisQueueService;
 import com.kktt.jesus.utils.CommonUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.runner.RunWith;
 import org.omg.PortableServer.POA;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.RedisServer;
 import org.springframework.test.annotation.Rollback;
@@ -40,17 +44,17 @@ public class Test extends BaseTest{
     private ProductConverter productConverter;
     @org.junit.Test
     public void test(){
-//        int index = 1;
-//        Instant now = Instant.now();
-//        Instant startInstant = now.minus(1, ChronoUnit.DAYS);
-//        String endDate = now.toString();
-//        String startDate = startInstant.toString();
-//        List<GotenProduct> xx = productConverter.getProduct(index,startDate,endDate);
-//        while (!CollectionUtils.isEmpty(xx)){
-//            saveProduct(xx);
-//            index ++;
-//            xx = productConverter.getProduct(index,startDate,endDate);
-//        }
+        int index = 1;
+        Instant now = Instant.now();
+        Instant startInstant = now.minus(1, ChronoUnit.DAYS);
+        String endDate = now.toString();
+        String startDate = startInstant.toString();
+        List<GotenProduct> xx = productConverter.getProduct(index,startDate,endDate);
+        while (!CollectionUtils.isEmpty(xx)){
+            saveProduct(xx);
+            index ++;
+            xx = productConverter.getProduct(index,startDate,endDate);
+        }
     }
 
     @org.junit.Test
@@ -65,12 +69,6 @@ public class Test extends BaseTest{
             Map<Long, BigDecimal> priceMap = productConverter.getProductPrice(group);
             updateProductPrice(priceMap);
         }
-    }
-
-    @org.junit.Test
-    public void tess(){
-        Map<Long, Integer> xx = productConverter.getProductInventory(Collections.singletonList(9988203L));
-        System.out.println(1);
     }
 
     @org.junit.Test
@@ -126,22 +124,8 @@ public class Test extends BaseTest{
         property.put("description",xx.getDescription());
         property.put("bullet_points",xx.getBulletPoint());
         property.put("generic_keywords",xx.getKeywords().replaceAll("\"","").replace("[","").replace("]"," "));
-        property.put("fulfillment_latency","3");
+        property.put("fulfillment_latency","5");
         property.put("feed_product_type","outdoorliving");
-
-
-//        String popt = xx.getProperty();
-//        if(!StringUtils.isEmpty(popt)){
-//            com.alibaba.fastjson.JSONObject popJson = JSON.parseObject(popt);
-//            property.put("package_height",popJson.getString("SpecHeight"));
-//            property.put("package_height_unit_of_measure","CM");
-//            property.put("package_width",popJson.getString("SpecWidth"));
-//            property.put("package_width_unit_of_measure","CM");
-//            property.put("package_length",popJson.getString("SpecLength"));
-//            property.put("package_length_unit_of_measure","CM");
-//            property.put("package_weight",popJson.getString("SpecWeight"));
-//            property.put("package_weight_unit_of_measure","GR");
-//        }
 
         target.setNodeValue(property.toString());
         target.setNodeId("16135380011");
@@ -156,23 +140,40 @@ public class Test extends BaseTest{
 
     @org.junit.Test
     public void getSingleProduct(){
-        GotenProduct xx = productConverter.getProduct(25792916L);
+        GotenProduct xx = productConverter.getProduct(93152635L);
         System.out.println(1);
     }
 
-    @Resource
-    private RedisQueueService redisQueueService;
     @org.junit.Test
-    public void redisTest(){
-//        redisQueueService.push("testList","11");
-        redisQueueService.leftPopAndAddIntoZSet("testList","zset");
+    public void warehouse(){
+        GoTenApi api = new GoTenApi();
+        com.alibaba.fastjson.JSONObject ss = api.getWarehouse();
+        System.out.println(1);
     }
 
-    private GotenProduct find(Long sku){
-        Example example = new Example(GotenProduct.class);
-        example.createCriteria().andEqualTo("sku", sku);
-        GotenProduct xx = gotenProductDao.selectOneByExample(example);
-        return xx;
+    @org.junit.Test
+    public void logistics(){
+        GoTenApi api = new GoTenApi();
+        com.alibaba.fastjson.JSONObject ss = api.getLogistics();
+        System.out.println(1);
+    }
+
+    @org.junit.Test
+    public void delete(){
+        //删除无用的商品
+        List<GotenProduct> all = gotenProductDao.queryAll();
+        for (GotenProduct gotenProduct : all) {
+            GotenProduct product = productConverter.getProduct(gotenProduct.getSku());
+            if(product == null){
+                gotenProductDao.batchUpdateState(Collections.singletonList(gotenProduct.getId()),GotenProduct.STATE.DELETE);
+            }
+        }
+    }
+
+    @org.junit.Test
+    public void testPrice(){
+        Map<Long, BigDecimal> xx = productConverter.getProductPrice(Collections.singletonList(70118289L));
+        System.out.println(1);
     }
 
     private void saveProduct(List<GotenProduct> xx ){
@@ -203,4 +204,147 @@ public class Test extends BaseTest{
         gotenProductDao.batchUpdatePrice(datas);
     }
 
+    protected static final Logger logger = LoggerFactory.getLogger(GoTenProductSyncScheduler.class);
+    @org.junit.Test
+    public void updateProduct() {
+        List<GotenProduct> newProductList = gotenProductDao.queryByBulletPoint();
+        if(CollectionUtils.isEmpty(newProductList)){
+            return;
+        }
+        for (GotenProduct gotenProduct : newProductList) {
+            logger.info("更新SKU:{}",gotenProduct.getSku());
+            Long sku = gotenProduct.getSku();
+            GotenProduct product = productConverter.getProduct(sku);
+            if(product == null){
+                gotenProductDao.updateState(sku+"");
+                continue;
+            }
+            gotenProduct.setBulletPoint(product.getBulletPoint());
+            gotenProduct.setProperty(product.getProperty());
+            gotenProduct.setDescription(product.getDescription());
+            gotenProductDao.updateByPrimaryKeySelective(gotenProduct);
+        }
+    }
+
+
+    @org.junit.Test
+    public void trans(){
+        String gk = "tv\n" +
+                "stand\n" +
+                "inch\n" +
+                "for\n" +
+                "fireplace\n" +
+                "with\n" +
+                "70\n" +
+                "65\n" +
+                "entertainment\n" +
+                "console\n" +
+                "center\n" +
+                "75\n" +
+                "cabinet\n" +
+                "room\n" +
+                "storage\n" +
+                "stands\n" +
+                "living\n" +
+                "corner\n" +
+                "white\n" +
+                "media\n" +
+                "flat\n" +
+                "table\n" +
+                "screens\n" +
+                "wood\n" +
+                "farmhouse\n" +
+                "in\n" +
+                "electric\n" +
+                "bookshelf\n" +
+                "black\n" +
+                "80\n" +
+                "dresser\n" +
+                "small\n" +
+                "55\n" +
+                "edison\n" +
+                "heater\n" +
+                "walker\n" +
+                "hemnes\n" +
+                "home\n" +
+                "ikea\n" +
+                "fire\n" +
+                "doors\n" +
+                "long\n" +
+                "gray\n" +
+                "modern\n" +
+                "low\n" +
+                "place\n" +
+                "sala\n" +
+                "ameriwood\n" +
+                "under\n" +
+                "de\n" +
+                "furniture\n" +
+                "up\n" +
+                "58\n" +
+                "60\n" +
+                "shelves\n" +
+                "rustic\n" +
+                "and\n" +
+                "muebles\n" +
+                "ashley\n" +
+                "bedroom\n" +
+                "grey\n" +
+                "82\n" +
+                "85\n" +
+                "remote\n" +
+                "inches\n" +
+                "90\n" +
+                "solid\n" +
+                "large\n" +
+                "profile\n" +
+                "combo\n" +
+                "tvs\n" +
+                "indoor\n" +
+                "style\n" +
+                "cherry\n" +
+                "juegos\n" +
+                "stanf\n" +
+                "electronic\n" +
+                "30\n" +
+                "espresso\n" +
+                "70”\n" +
+                "sets\n" +
+                "television\n" +
+                "tb\n" +
+                "component\n" +
+                "la\n" +
+                "sunbury\n" +
+                "credenza\n" +
+                "to\n" +
+                "door\n" +
+                "screen\n" +
+                "space\n" +
+                "simpli\n" +
+                "high\n" +
+                "theater\n" +
+                "tall\n" +
+                "50\n" +
+                "glass\n" +
+                "bench\n" +
+                "70in\n" +
+                "brown\n" +
+                "credenzas\n" +
+                "shelf\n" +
+                "desk\n" +
+                "game\n" +
+                "units\n" +
+                "para\n" +
+                "extra\n" +
+                "72\n" +
+                "floor\n" +
+                "universal\n" +
+                "78\n" +
+                "coffee\n" +
+                "wall\n" +
+                "75";
+
+        String xx = gk.replace("\n", " ");
+        System.out.println(xx);
+    }
 }

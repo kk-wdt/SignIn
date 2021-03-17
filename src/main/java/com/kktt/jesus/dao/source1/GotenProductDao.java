@@ -43,4 +43,18 @@ public interface GotenProductDao  extends Mapper<GotenProduct> {
     void updateState(@Param("skus") String skuStr);
 
     void batchUpdateState(@Param("idList")List<String> idList,@Param("state") Integer state);
+
+    @Select("SELECT * FROM goten_product WHERE bullet_point = \"null\" or bullet_point = \"[]\"")
+    List<GotenProduct> queryByBulletPoint();
+
+    @Select("SELECT * FROM goten_product WHERE sku = #{sku}")
+    List<GotenProduct> queryBySku(@Param("sku") Long sku);
+
+    @Select("select * from goten_product")
+    List<GotenProduct> queryAll();
+
+    @Select("SELECT * FROM goten_product WHERE description = \"\"")
+    List<GotenProduct> queryxx();
+
+    List<GotenProduct> selectDeskChair(@Param("category") String category,@Param("thirdCategory")  String thirdCategory);
 }

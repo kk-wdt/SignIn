@@ -137,7 +137,7 @@ public class FeedsXmlUtil {
             Inventory inventory = new Inventory();
             inventory.setSku(inventories.get(i).getSku());
             inventory.setQuantity(inventories.get(i).getQuantity());
-            inventory.setFulfillmentLatency(inventories.get(i).getFulfillmentLatency());
+            inventory.setFulfillmentLatency("5");
             msg.setInventory(inventory);
             messages.add(msg);
         }

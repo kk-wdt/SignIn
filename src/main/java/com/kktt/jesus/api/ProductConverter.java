@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kktt.jesus.dao.source1.GotenProductDao;
 import com.kktt.jesus.dataobject.GotenProduct;
-import com.kktt.jesus.schedule.GoTenProductSyncScheduler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.Max;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,9 +65,22 @@ public class ProductConverter {
         for (int i = 0; i < messages.size(); i++) {
             JSONObject message = messages.getJSONObject(i);
             Long sku = message.getLong("Sku");
-            JSONObject priceJson = message.getJSONArray("WarehousePriceList").getJSONObject(0);
-            BigDecimal price = priceJson.getBigDecimal("SellingPrice");
-            priceMap.put(sku,price);
+            JSONArray wps = message.getJSONArray("WarehousePriceList");
+            for (int i1 = 0; i1 < wps.size(); i1++) {
+                JSONObject xx = wps.getJSONObject(i1);
+                if("USD".equals(xx.getString("CurrencyCode")) &&  "SZ0001".equals(xx.getString("StockCode"))){
+                    if(priceMap.get(sku) == null){
+                        BigDecimal price = xx.getBigDecimal("SellingPrice");
+                        priceMap.put(sku,price);
+                    }else{
+                        BigDecimal price = xx.getBigDecimal("SellingPrice");
+                        BigDecimal lastPrice = priceMap.get(sku);
+                        if(price.compareTo(lastPrice) <  0){
+                            priceMap.put(sku,price);
+                        }
+                    }
+                }
+            }
         }
         return priceMap;
     }
@@ -146,18 +159,28 @@ public class ProductConverter {
             }
             gotenProduct.setImageUrls(JSON.toJSONString(extraImages));
 
-
             //desc
-            JSONArray xx = productInfo.getJSONArray("GoodsDescriptionList");
+
+     JSONArray xx = productInfo.getJSONArray("GoodsDescriptionList");
             for (int k = 0; k < xx.size(); k++) {
                 JSONArray propertyArr = xx.getJSONObject(k).getJSONArray("GoodsDescriptionParagraphList");
                 StringBuilder descHtml = new StringBuilder();
                 for (int h = 0; h < propertyArr.size(); h++) {
                     JSONObject property = propertyArr.getJSONObject(h);
+                    String propName = property.getString("ParagraphName");
+                    if(propName.equals("特征")){
+                        //这是5点描述
+                        String bulletPoints = parseBulletPoint(property.getString("GoodsDescription"));
+                        gotenProduct.setBulletPoint(bulletPoints);
+                        continue;
+                    }
                     String desc = property.getString("GoodsDescription");
                     //最大长度2000
                     if(descHtml.length() + desc.length() <= 1500){
                         descHtml.append(desc);
+                    }else{
+                        desc = Jsoup.parse(desc).text();
+                        descHtml.append(desc).append("<br/>");
                     }
                 }
                 gotenProduct.setDescription(descHtml.toString());
@@ -174,6 +197,55 @@ public class ProductConverter {
             products.add(gotenProduct);
         }
         return products;
+    }
+
+    private String parseBulletPoint(String desc) {
+        String[] bullets = new String[0];
+        if(desc.contains("Note:")){
+            Elements pList = Jsoup.parse(desc).select("p");
+            for (Element element : pList) {
+                if(element.text().contains("Features")){
+                    bullets = element.text().split("[ ]\\d+[.]");
+                }
+            }
+            if(bullets.length == 0){
+                bullets = Jsoup.parse(desc).text().split("[ ]\\d+[.]");
+            }
+        }else{
+            if(desc.contains("【") &&desc.contains("】")){
+                String[] unfinishBulletss = Jsoup.parse(desc).text().split("【");
+                for (int i = 0; i < unfinishBulletss.length; i++) {
+                    if(i == 0){
+                        unfinishBulletss[i] = "";
+                    }else{
+                        unfinishBulletss[i] = "【"+unfinishBulletss[i];
+                    }
+                }
+                bullets = unfinishBulletss;
+            }else{
+                bullets = Jsoup.parse(desc).text().split("[ ]\\d+[.]+[ ]");
+                if(bullets.length <= 1){
+                    bullets = Jsoup.parse(desc).text().split("[ ]\\d+[.]");
+                }
+            }
+        }
+        if(bullets.length == 0){
+            bullets = desc.split("<br/>");
+        }
+
+        List<String> bulletList = new ArrayList<>();
+        for (int b = 0; b < bullets.length; b++) {
+            if(b == 0){
+                continue;
+            }
+
+            String bulletContent = bullets[b].replace("</p>","").replace("</p>","");
+            if(StringUtils.isEmpty(bulletContent.trim()) || bulletContent.length() < 3){
+                continue;
+            }
+            bulletList.add(bulletContent.trim());
+        }
+        return JSON.toJSONString(bulletList);
     }
 
     private boolean validProduct(JSONObject productInfo) {

@@ -60,7 +60,7 @@ public class AmzFlatFileListingBatchCreateScheduler extends AmzListingCreateBase
     /**
      * 处理出错的提交记录
      */
-    @Scheduled(fixedDelay = 120 * 1000, initialDelay = 10 * 1000)
+//    @Scheduled(fixedDelay = 10 * 1000, initialDelay = 10 * 1000)
     public void dealWithErrorRequest() {
         //8541 8008 重新提交
         logger.info("listing搬运 -- 处理错误记录");
@@ -331,18 +331,18 @@ public class AmzFlatFileListingBatchCreateScheduler extends AmzListingCreateBase
     private UpcDao upcDao;
 
     private String getUpc(AliexpressSkuPublishEntity task) {
-        if(StringUtils.isNotEmpty(task.getUpc()) && task.getState().equals(AliexpressSkuPublishEntity.STATE.SUCCESS)){
-            return task.getUpc();
-        }
-
-        List<UpcEntity> upcList = upcDao.fetch(1);
-        if(CollectionUtils.isEmpty(upcList)){
-            throw new IllegalArgumentException("UPC 码不足");
-        }
-        String upc = upcList.get(0).getUpc();
-        aliexpressSkuPublishDao.updateUpc(task.getAmazonMarketplaceId(),task.getSkuId(),upc);
-        upcDao.used(upc);
-        return upc;
+//        if(StringUtils.isNotEmpty(task.getUpc()) && task.getState().equals(AliexpressSkuPublishEntity.STATE.SUCCESS)){
+//            return task.getUpc();
+//        }
+//
+//        List<UpcEntity> upcList = upcDao.fetch(1);
+//        if(CollectionUtils.isEmpty(upcList)){
+//            throw new IllegalArgumentException("UPC 码不足");
+//        }
+//        String upc = upcList.get(0).getUpc();
+//        aliexpressSkuPublishDao.updateUpc(task.getAmazonMarketplaceId(),task.getSkuId(),upc);
+//        upcDao.used(upc);
+        return "";
     }
 
     public void syncState() {

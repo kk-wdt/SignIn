@@ -2,9 +2,11 @@ package com.kktt.jesus.schedule;
 
 import com.alibaba.fastjson.JSON;
 import com.kktt.jesus.api.ProductConverter;
+import com.kktt.jesus.dao.source1.AliexpressSkuPublishDao;
 import com.kktt.jesus.dao.source1.PublishMapper;
 import com.kktt.jesus.dataobject.AliExpressItem;
 import com.kktt.jesus.dataobject.AliexpressSkuPublishEntity;
+import com.kktt.jesus.dataobject.GotenProduct;
 import com.kktt.jesus.schedule.task.AliExpressListTask;
 import com.kktt.jesus.service.RedisQueueService;
 import com.kktt.jesus.utils.CommonUtil;
@@ -25,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.kktt.jesus.schedule.AmzListingManageScheduler.GT_QUEUE_FEEDS_REQUEST_TASK;
 
-//@Component
+@Component
 public class GoTenProductMonitorScheduler {
     protected static final Logger logger = LoggerFactory.getLogger(GoTenProductMonitorScheduler.class);
 
@@ -35,13 +37,44 @@ public class GoTenProductMonitorScheduler {
     private ProductConverter productConverter;
     @Resource
     private RedisQueueService redisQueueService;
+    @Resource
+    private AliexpressSkuPublishDao aliexpressSkuPublishDao;
 
-    @Scheduled(fixedDelay = 10 * 1000, initialDelay = 10 * 1000)
+//    @Scheduled(fixedDelay = 1000 * 1000, initialDelay = 10 * 1000)
+    public void deleteErrorProduct(){
+        Example example = new Example(AliexpressSkuPublishEntity.class);
+        example.createCriteria().andEqualTo("state", 2);
+        List<AliexpressSkuPublishEntity> monitorData = publishMapper.selectByExample(example);
+
+        List<AliexpressSkuPublishEntity> updateList =new ArrayList<>();
+
+        List<AliExpressItem> inventoryUpdateList = new ArrayList<>();
+        for (AliexpressSkuPublishEntity monitorDatum : monitorData) {
+            Long sku = monitorDatum.getSkuId();
+            GotenProduct product = productConverter.getProduct(sku);
+            if(product == null){
+                inventoryUpdateList.add(new AliExpressItem(getSku(sku),0));
+                updateList.add(monitorDatum);
+            }
+        }
+        if(CollectionUtils.isNotEmpty(inventoryUpdateList)){
+            List<String> skuList = updateList.stream().map(AliexpressSkuPublishEntity::getId).collect(Collectors.toList());
+            aliexpressSkuPublishDao.updateState(skuList,AliexpressSkuPublishEntity.STATE.IGNORE);
+            logger.info("速卖通价格 - 库存监听:删除：{}",inventoryUpdateList.size());
+            pushTask(1,AliExpressListTask.TYPE.INVENTORY,inventoryUpdateList);
+        }
+
+    }
+
+
+    @Scheduled(fixedDelay = 1000 * 1000, initialDelay = 10 * 1000)
 //    @Scheduled(cron = "0 10 0 * * ?", zone = "GMT+8")
     public void runSyncProduct() {
         Example example = new Example(AliexpressSkuPublishEntity.class);
         example.createCriteria().andEqualTo("state", 2);
         List<AliexpressSkuPublishEntity> monitorData = publishMapper.selectByExample(example);
+
+
         //监听库存和价格
         List<List<AliexpressSkuPublishEntity>> group = CommonUtil.subCollection(monitorData, 50);
 
@@ -54,29 +87,29 @@ public class GoTenProductMonitorScheduler {
             List<Long> groupSkuList = groupData.stream().map(AliexpressSkuPublishEntity::getSkuId).collect(Collectors.toList());
             Map<Long, Integer> inventoryMap = productConverter.getProductInventory(groupSkuList);
             Map<Long, BigDecimal> priceMap = productConverter.getProductPrice(groupSkuList);
+
             for (AliexpressSkuPublishEntity oldData : groupData) {
                 //判断库存是否为0或者商品找不到
                 Long sku = oldData.getSkuId();
                 Integer inventory = inventoryMap.get(sku);
                 BigDecimal originPrice = priceMap.get(sku);
-                //请求MWS 更新库存
                 boolean isChange = false;
                 if(inventory == null || originPrice == null){
                     //商品不存在 也删除
-                    inventoryUpdateList.add(new AliExpressItem(sku+"",0));
+                    inventoryUpdateList.add(new AliExpressItem(getSku(sku),0));
                     oldData.setInventory(0);
                     isChange = true;
                 }else{
                     BigDecimal currentSalePrice = recalculatePrice(originPrice);
                     if(oldData.getPrice().compareTo(currentSalePrice) != 0){
                         oldData.setPrice(currentSalePrice);
-                        priceUpdateList.add(new AliExpressItem(sku+"",currentSalePrice.doubleValue()));
+                        priceUpdateList.add(new AliExpressItem(getSku(sku),currentSalePrice.doubleValue()));
                         isChange = true;
                     }
 
                     if(inventory.compareTo(oldData.getInventory()) != 0){
                         oldData.setInventory(inventory);
-                        inventoryUpdateList.add(new AliExpressItem(sku+"",inventory));
+                        inventoryUpdateList.add(new AliExpressItem(getSku(sku),inventory));
                         isChange = true;
                     }
                 }
@@ -85,26 +118,30 @@ public class GoTenProductMonitorScheduler {
                 }
             }
 
-            if(CollectionUtils.isNotEmpty(priceUpdateList)){
-                logger.info("速卖通价格 - 库存监听:价格更新数量：{}",priceUpdateList.size());
-                pushTask(1,AliExpressListTask.TYPE.PRICE,priceUpdateList);
-            }
-            if(CollectionUtils.isNotEmpty(inventoryUpdateList)){
-                logger.info("速卖通价格 - 库存监听:库存更新数量：{}",inventoryUpdateList.size());
-                pushTask(1,AliExpressListTask.TYPE.INVENTORY,inventoryUpdateList);
-            }
-            if(CollectionUtils.isNotEmpty(updateList)){
-                logger.info("速卖通价格 - 库存监听:总更新数量：{}",updateList.size());
-                publishMapper.batchUpdate(updateList);
-            }else {
-                logger.info("速卖通价格 - 库存监听: 没有数据发生变化");
-            }
+        }
+        if(CollectionUtils.isNotEmpty(priceUpdateList)){
+            logger.info("速卖通价格 - 库存监听:价格更新数量：{}",priceUpdateList.size());
+            pushTask(1,AliExpressListTask.TYPE.PRICE,priceUpdateList);
+        }
+        if(CollectionUtils.isNotEmpty(inventoryUpdateList)){
+            logger.info("速卖通价格 - 库存监听:库存更新数量：{}",inventoryUpdateList.size());
+            pushTask(1,AliExpressListTask.TYPE.INVENTORY,inventoryUpdateList);
+        }
+        if(CollectionUtils.isNotEmpty(updateList)){
+            logger.info("速卖通价格 - 库存监听:总更新数量：{}",updateList.size());
+            publishMapper.batchUpdate(updateList);
+        }else {
+            logger.info("速卖通价格 - 库存监听: 没有数据发生变化");
         }
 
     }
 
+    private String getSku(Long skuId){
+        return "gt_s1_"+skuId;
+    }
+
     private BigDecimal recalculatePrice(BigDecimal originPrice){
-        BigDecimal tmp  = originPrice.divide(new BigDecimal("0.65"));
+        BigDecimal tmp  = originPrice.divide(new BigDecimal("0.65"),BigDecimal.ROUND_HALF_UP);
         return tmp.setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 

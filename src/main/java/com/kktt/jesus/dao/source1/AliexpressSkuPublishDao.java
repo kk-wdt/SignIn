@@ -39,7 +39,7 @@ public class AliexpressSkuPublishDao {
 
     public List<AliexpressSkuPublishEntity> queryRetryTask(){
         Integer state = AliexpressSkuPublishEntity.STATE.FAILURE;
-        StringBuilder sql = new StringBuilder("select * from aliexpress_sku_publish where state = ? and count < 100");
+        StringBuilder sql = new StringBuilder("select * from aliexpress_sku_publish where state = ? and count < 2");
         return jdbcDropShippingTemplate.query(sql.toString(),new BeanPropertyRowMapper<>(AliexpressSkuPublishEntity.class),state);
     }
 

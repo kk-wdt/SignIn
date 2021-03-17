@@ -65,6 +65,26 @@ public class GoTenApi extends BaseApi {
         return response.getBody();
     }
 
+    public JSONObject getWarehouse(){
+        Map<String, String> map = createCommonParam();
+        map = sortMapByKey(map);
+        String sign = encrypt(JSON.toJSONString(map, SerializerFeature.WriteMapNullValue));
+        String replaceBlankSign = replaceBlank(sign);
+        map.put("Sign", replaceBlankSign);
+        ResponseEntity<JSONObject> response = RestTemplateUtils.postJson(ApiConstant.WAREHOUSE_URL, JSON.toJSONString(map, SerializerFeature.WriteMapNullValue), JSONObject.class);
+        return response.getBody();
+    }
+
+    public JSONObject getLogistics(){
+        Map<String, String> map = createCommonParam();
+        map = sortMapByKey(map);
+        String sign = encrypt(JSON.toJSONString(map, SerializerFeature.WriteMapNullValue));
+        String replaceBlankSign = replaceBlank(sign);
+        map.put("Sign", replaceBlankSign);
+        ResponseEntity<JSONObject> response = RestTemplateUtils.postJson(ApiConstant.LOGISTICS_URL, JSON.toJSONString(map, SerializerFeature.WriteMapNullValue), JSONObject.class);
+        return response.getBody();
+    }
+
     private JSONObject createProductRequestMessage(int index,String startDate,String endDate){
         JSONObject message = new JSONObject();
         message.put("startTime",startDate);
@@ -78,6 +98,7 @@ public class GoTenApi extends BaseApi {
         JSONObject message = new JSONObject();
         message.put("Skus",JSON.parseArray(JSONObject.toJSONString(skuList)));
         message.put("Site", "www.gotenchina.com");
+        message.put("WarehouseCode","SZ0001");
         return message;
     }
 
@@ -85,6 +106,7 @@ public class GoTenApi extends BaseApi {
         JSONObject message = new JSONObject();
         message.put("SkuList",JSON.parseArray(JSONObject.toJSONString(skuList)));
         message.put("Site", "www.gotenchina.com");
+        message.put("WarehouseCode","SZ0001");
         return message;
     }
 }

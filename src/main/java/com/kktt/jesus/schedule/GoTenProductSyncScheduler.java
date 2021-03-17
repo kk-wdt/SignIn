@@ -39,13 +39,15 @@ public class GoTenProductSyncScheduler {
     @Resource
     private RedisQueueService redisQueueService;
 
-    @Scheduled(cron = "0 10 22 * * ?", zone = "GMT+8")
-//    @Scheduled(fixedDelay = 30000 * 1000, initialDelay = 10 * 1000)
+//    @Scheduled(cron = "0 10 22 * * ?", zone = "GMT+8")
+    @Scheduled(fixedDelay = 30000 * 1000, initialDelay = 10 * 1000)
     public void runSyncProduct() {
         Instant now = Instant.now();
-        Instant startInstant = now.minus(60, ChronoUnit.DAYS);
-        String endDate = now.toString();
+        Instant startInstant = now.minus(0, ChronoUnit.DAYS);
+        Instant endInstant = now.minus(12, ChronoUnit.DAYS);
         String startDate = startInstant.toString();
+        String endDate = endInstant.toString();
+
         int index = 1;
         int max = productConverter.getProductSize(1,startDate,endDate);
         logger.info("同步商品开始 总页数：{}",max);
@@ -69,6 +71,9 @@ public class GoTenProductSyncScheduler {
         List<List<Long>> skuGroup = CommonUtil.subCollection(skuList, 1);
         for (List<Long> group : skuGroup) {
             Map<Long, BigDecimal> priceMap = productConverter.getProductPrice(group);
+            if(priceMap.isEmpty()){
+                gotenProductDao.updateState(group.get(0)+"");
+            }
             updateProductPrice(priceMap);
         }
     }
